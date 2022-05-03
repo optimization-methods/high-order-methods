@@ -1,2 +1,2 @@
-# high-order-methods
+# High Order Methods
  
