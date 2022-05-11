@@ -42,6 +42,7 @@ def Gauss_Newton(m_f, x, y, b0, epoch):
     for itr in range(epoch):
         old = new
         J = Jacobian(m_f, old, x)
+        print(f'{J=}')
 
         dy = y - np.array([m_f(old, *p) for p in x])
         new = old + np.linalg.inv(J.T @ J) @ J.T @ dy
@@ -103,8 +104,8 @@ def three_dim(c, start, stop, size):
 def main():
     np.set_printoptions(suppress=True)
     two_dim_dataset(np.ones(10))
-    two_dim([1, 1], 1, 5, 50)
-    three_dim([1, 1, 1], -5, 5, 100)
+    # two_dim([1, 1], 1, 5, 50)
+    # three_dim([1, 1, 1], -5, 5, 100)
 
 
 if __name__ == '__main__':
