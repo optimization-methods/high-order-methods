@@ -2,7 +2,9 @@ import matplotlib as mpl
 import numpy as np
 
 from utils.dataset_reader import DatasetReader
-from utils.drawer import SGDResult, Drawer
+from utils.drawer import Drawer
+from descent.methods.descent_result import DescentResult
+from descent.methods.descent_method import DescentMethod
 
 mpl.use('TkAgg')
 
@@ -50,7 +52,7 @@ def Gauss_Newton(m_f, x, y, b0, epoch):
             break
 
     # return new
-    return SGDResult(points, points, m_f, 'Gauss_Newton')
+    return DescentResult(points, points, m_f, 'Gauss_Newton')
 
 
 def two_dim(initial, start, stop, size):
@@ -75,7 +77,8 @@ def two_dim_dataset(result):
             accumulator += m_b[i] * m_x ** i
         return accumulator
 
-    X, Y = np.array(DatasetReader('planar').input)[:, 0], np.array(DatasetReader('planar').output)
+    data = DatasetReader('planar')
+    X, Y = np.array(data.input)[:, 0], np.array(data.output)
 
     result = Gauss_Newton(f, X, Y, result, epoch=10)
     drawer = Drawer(result)
@@ -106,3 +109,11 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+class GaussNewtonDescentMethod(DescentMethod):
+    def __init__(self, config):
+        config.fistingate()
+
+    def converge(self):
+        return DescentResult('pigis')

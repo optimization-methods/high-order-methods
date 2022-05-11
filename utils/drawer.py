@@ -2,27 +2,10 @@ import os
 
 import numpy as np
 from matplotlib import pyplot as plt, cm
+# from utils.config import dtype
+import utils.config as config
 
-dtype_ = np.dtype("float64")
-
-
-class SGDResult:
-    def __init__(self,
-                 rescaled_scalars, scaled_scalars,
-                 func, method_name,
-                 batch_size=None, scaler_name=None,
-                 time=None, memory=None, grad_calls=None):
-        self.rescaled_scalars = rescaled_scalars
-        self.scaled_scalars = scaled_scalars
-        self.func = func
-
-        self.batch_size = batch_size
-        self.scaler_name = scaler_name
-        self.method_name = method_name
-
-        self.time = time
-        self.memory = memory
-        self.grad_calls = grad_calls
+save_directory = "../images"
 
 
 class SurfaceConfig(object):
@@ -31,6 +14,7 @@ class SurfaceConfig(object):
         self.color = color
 
 
+# noinspection SpellCheckingInspection
 class ContourConfig(object):
     def __init__(self, cmap, alpha, linestyles, linewidths):
         self.cmap = cmap
@@ -39,6 +23,7 @@ class ContourConfig(object):
         self.linewidths = linewidths
 
 
+# noinspection SpellCheckingInspection
 class LineConfig(object):
     def __init__(self, cmap, alpha, marker, markersize, linestyle, linewidth):
         self.cmap = cmap
@@ -51,8 +36,8 @@ class LineConfig(object):
 
 class Drawer(object):
     def __init__(self, sgd_result):
-        self.scaled = np.array(sgd_result.scaled_scalars, dtype=dtype_)
-        self.rescaled = np.array(sgd_result.rescaled_scalars, dtype=dtype_)
+        self.scaled = np.array(sgd_result.scaled_scalars, dtype=config.dtype)
+        self.rescaled = np.array(sgd_result.rescaled_scalars, dtype=config.dtype)
         self.func = sgd_result.func
 
         self.batch_size = sgd_result.batch_size
@@ -101,10 +86,10 @@ class Drawer(object):
             raise ValueError("Cannot draw 3d graphic.\n"
                              "Reason: only two parameters must be optimized\n")
 
-        X, Y, Z = self.__calculate_values(amount=1000, additional_shift=5)
+        x, y, z = self.__calculate_values(amount=1000, additional_shift=5)
 
         ax = plt.figure(figsize=(5, 5)).add_subplot(111, projection='3d')
-        ax.plot_surface(X, Y, Z,
+        ax.plot_surface(x, y, z,
                         color=self.surface_config.color,
                         alpha=self.surface_config.alpha)
 
@@ -123,7 +108,7 @@ class Drawer(object):
 
         # quadratic function, already calculated for all x and y
         levels = sorted(list(set([self.func(p) for p in self.scaled])))
-        ax.contour(X, Y, Z, levels=levels,
+        ax.contour(x, y, z, levels=levels,
                    alpha=self.contour_config.alpha,
                    cmap=self.contour_config.cmap,
                    linestyles=self.contour_config.linestyles,
@@ -144,9 +129,9 @@ class Drawer(object):
             raise ValueError("Cannot draw 3d graphic projection.\n"
                              "Reason: only two parameters must be optimized\n")
 
-        X, Y, Z = self.__calculate_values(amount=1000, additional_shift=5)
+        x, y, z = self.__calculate_values(amount=1000, additional_shift=5)
 
-        plt.contour(X, Y, Z, sorted([self.func(p) for p in self.scaled]))
+        plt.contour(x, y, z, sorted([self.func(p) for p in self.scaled]))
         plt.plot(self.scaled[:, 0], self.scaled[:, 1],
                  marker=self.line_config.marker,
                  linestyle=self.line_config.linestyle,
@@ -185,8 +170,12 @@ class Drawer(object):
             for i in range(1, len(scalar)):
                 y += x * scalar[i]
 
-            linewidth = 3 if index == 0 or index == (len(scalars) - 1) else 0.6
-            plt.plot(x, y, color=c, linewidth=linewidth)
+            plt.plot(
+                x,
+                y,
+                color=c,
+                linewidth=(3 if index == 0 or index == (len(scalars) - 1) else 0.6)
+            )
 
         plt.title('Linear Regression')
         plt.xlabel('X axis')
@@ -242,7 +231,7 @@ class Drawer(object):
 
     def __complete_plot(self, directory, show_image):
         os.makedirs(directory, exist_ok=True)
-        plt.savefig(f'{directory}/scaler-{self.scaler_name}_method-{self.method_name}_batch-{self.batch_size}.png')
+        plt.savefig(f'{save_directory}/{directory}/scaler-{self.scaler_name}_method-{self.method_name}_batch-{self.batch_size}.png')
 
         if show_image:
             plt.show()

@@ -20,7 +20,7 @@ def bfgs_method(f, fprime, x0, maxiter=None, epsi=10e-3):
 
     Parameters
     ----------
-    func : f(x)
+    f : f(x)
         Function to minimise.
     x0 : ndarray
         Initial guess.
@@ -78,3 +78,12 @@ result, k = bfgs_method(f, f1, np.array([1, 1]))
 print('Result of BFGS method:')
 print('Final Result (best point): %s' % (result))
 print('Iteration Count: %s' % (k))
+
+
+# noinspection SpellCheckingInspection
+class BfgsDescentMethod(DescentMethod):
+    def __init__(self, config):
+        config.fistingate()
+
+    def converge(self):
+        return DescentResult('pigis')

@@ -2,10 +2,15 @@ from math import sqrt
 
 import numpy as np
 import numpy.linalg as ln
-from matplotlib import pyplot as plt, cm
-import matplotlib as mpl
 
-from utils.drawer import SGDResult, Drawer
+import matplotlib as mpl
+from matplotlib import pyplot as plt, cm
+
+from descent.methods.descent_result import DescentResult
+from descent.methods.descent_method import DescentMethod
+
+from utils.dataset_reader import DatasetReader
+from utils.drawer import Drawer
 
 mpl.use('TkAgg')
 
@@ -167,3 +172,11 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+class DogLegDescentMethod(DescentMethod):
+    def __init__(self, config):
+        config.fistingate()
+
+    def converge(self):
+        return DescentResult('pigis')
