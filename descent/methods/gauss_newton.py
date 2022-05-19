@@ -1,57 +1,41 @@
-import matplotlib as mpl
 import numpy as np
 
+from descent.methods.descent_method import DescentMethod
+from descent.methods.descent_result import DescentResult
+from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
-from descent.methods.descent_result import DescentResult
-from descent.methods.descent_method import DescentMethod
-
-mpl.use('TkAgg')
 
 
-def Jacobian(m_f, b, x):
-    eps = 1e-6
-
-    if isinstance(x[0], np.float64):
-        x = np.array([[p] for p in x])
-
-    grads = []
-    for i in range(len(b)):
-        t = np.zeros(len(b)).astype(float)
-        t[i] = t[i] + eps
-
-        f1 = np.array([m_f(b + t, *p) for p in x])
-        f2 = np.array([m_f(b - t, *p) for p in x])
-
-        grad = (f1 - f2) / (2 * eps)
-        grads.append(grad)
-
-    return np.column_stack(grads)
-
-
-def Gauss_Newton(m_f, x, y, b0, epoch):
-    tolerance = 1e-5
-
-    if isinstance(x[0], np.float64):
-        x = np.array([[p] for p in x])
-
-    points = []
-
-    new = np.array(b0)
-    points.append(new.tolist())
-    for itr in range(epoch):
-        old = new
-        J = Jacobian(m_f, old, x)
-        dy = y - np.array([m_f(old, *p) for p in x])
-        new = old + np.linalg.inv(J.T @ J) @ J.T @ dy
-        points.append(new)
-
-        if np.linalg.norm(old - new) < tolerance:
-            break
-
-    # return new
-    return DescentResult(points, points, m_f, 'Gauss_Newton')
-
+# mpl.use('TkAgg')
+# def Jacobian(m_f, b, x):
+#     eps = 1e-6
+#     grads = []
+#     for i in range(len(b)):
+#         t = np.zeros(len(b)).astype(float)
+#         t[i] = t[i] + eps
+#         grad = (m_f(b + t, x) - m_f(b - t, x)) / (2 * eps)
+#         grads.append(grad)
+#
+#     return np.column_stack(grads)
+# def Gauss_Newton(m_f, x, y, b0, epoch):
+#     tolerance = 1e-5
+#
+#     points = []
+#
+#     new = np.array(b0)
+#     points.append(new.tolist())
+#     for itr in range(epoch):
+#         old = new
+#         J = Jacobian(m_f, old, x)
+#         dy = y - m_f(old, x)
+#         new = old + np.linalg.inv(J.T @ J) @ J.T @ dy
+#         points.append(new)
+#
+#         if np.linalg.norm(old - new) < tolerance:
+#             break
+#
+#     return DescentResult(points, points, m_f, 'Gauss_Newton')
 
 def two_dim(initial, start, stop, size):
     # TODO: can be applied draw_3d
@@ -84,16 +68,17 @@ def two_dim_dataset(result):
 
 
 def three_dim(c, start, stop, size):
-    def f(m_b, m_x1, m_x2):
-        return m_b[0] - (1 / m_b[1]) * m_x1 ** 2 - (1 / m_b[2]) * m_x2 ** 2
+    def f(m_b, m_x):
+        return m_b[0] - (1 / m_b[1]) * m_x[:, 0] ** 2 - (1 / m_b[2]) * m_x[:, 1] ** 2
 
     # Generating data
     X1 = np.linspace(start, stop, size)
     X2 = np.linspace(start, stop, size)
     X1, X2 = np.meshgrid(X1, X2)
-    Y = f([2, 3, 1], X1, X2) + np.random.normal(0, 1, size=X1.shape)
+    X = np.column_stack([X1.ravel(), X2.ravel()])
+    Y = f([2, 3, 1], X) + np.random.normal(0, 1, size=len(X))
 
-    c = Gauss_Newton(f, np.column_stack([X1.ravel(), X2.ravel()]), Y.ravel(), c, 10)
+    c = Gauss_Newton(f, X, Y, c, 10)
     drawer = Drawer(c)
     drawer.draw_3d_nonlinear_regression(X1, X2, Y, show_image=True)
 
@@ -110,8 +95,39 @@ if __name__ == '__main__':
 
 
 class GaussNewtonDescentMethod(DescentMethod):
-    def __init__(self, config):
-        config.fistingate()
+    def __init__(self, func, start, xs, ys,
+                 epoch=30,
+                 tolerance=1e-5):
+        self.func = func
+        self.start = start
+        self.xs = np.array(xs, config.dtype)
+        self.ys = np.array(ys, config.dtype)
+
+        self.epoch = epoch
+        self.tolerance = tolerance
+
+    def get_jacobian(self, b, x):
+        eps = 1e-6
+        grads = []
+        for i in range(len(b)):
+            t = np.zeros(len(b)).astype(float)
+            t[i] = t[i] + eps
+            grad = (self.func(b + t, x) - self.func(b - t, x)) / (2 * eps)
+            grads.append(grad)
+        return np.column_stack(grads)
 
     def converge(self):
-        return DescentResult('pigis')
+        points = []
+        new = np.array(self.start)
+        points.append(new.tolist())
+        for itr in range(self.epoch):
+            old = new
+            jacobian = self.get_jacobian(old, self.xs)
+            dy = self.ys - self.func(old, self.xs)
+            new = old + np.linalg.inv(jacobian.T @ jacobian) @ jacobian.T @ dy
+            points.append(new)
+
+            if np.linalg.norm(old - new) < self.tolerance:
+                break
+
+        return DescentResult(points, points, self.func, method_name='Gauss_Newton')

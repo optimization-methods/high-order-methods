@@ -1,7 +1,7 @@
 import matplotlib as mpl
 import numpy as np
 import numpy.linalg as ln
-from matplotlib import pyplot as plt
+import scipy.optimize
 
 from descent.methods.descent_result import DescentResult
 from utils.dataset_reader import DatasetReader
@@ -35,6 +35,19 @@ class LineSearch(object):
 
         print(B[round(len(B) / 2)])
         return B[round(len(B) / 2)]
+
+    # def line_search(f, x, p, nabla):
+    #     a = 1
+    #     c1 = 1e-4
+    #     c2 = 0.9
+    #     fx = f(x)
+    #     x_new = x + a * p
+    #     nabla_new = grad(f, x_new)
+    #     while f(x_new) >= fx + (c1 * a * nabla.T @ p) or nabla_new.T @ p <= c2 * nabla.T @ p:
+    #         a *= 0.5
+    #         x_new = x + a * p
+    #         nabla_new = grad(f, x_new)
+    #     return a
 
     def line_search(self, slr):
         def search(ll, rr):
@@ -128,7 +141,11 @@ def bfgs_method(x0, X, Y, eps=10e-3):
     while ln.norm(g) > eps:
         direction = -np.dot(H, g)
 
-        alpha = LineSearch(x0, direction, X, Y).line_search1(0.01)
+        # alpha = LineSearch(x0, direction, X, Y).line_search1(0.01)
+        jok = scipy.optimize.line_search(lambda xx: f(xx, X, Y), lambda xx: gradient(xx, X, Y), x0, direction)
+        print(jok)
+        alpha = jok[0]
+        print(alpha)
 
         x1 = x0 + alpha * direction
         step = x1 - x0

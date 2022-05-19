@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt, cm
 # from utils.config import dtype
 import utils.config as config
 
-save_directory = "../../images"
+save_directory = "../images"
 
 
 class SurfaceConfig(object):
@@ -187,21 +187,21 @@ class Drawer(object):
     Requires only predicted height function.
     Possible many parameters.
     '''
-    def draw_2d_nonlinear_regression(self, x, y, shift=2, show_image=True):
+    def draw_2d_nonlinear_regression(self, xs, ys, shift=2, show_image=True):
         first_scalar = self.rescaled[0]
         last_scalar = self.rescaled[-1]
 
         ax = plt.gca()
-        ax.set_xlim([np.amin(x) - shift, np.amax(x) + shift])
-        ax.set_ylim([np.amin(y) - shift, np.amax(y) + shift])
+        ax.set_xlim([np.amin(xs) - shift, np.amax(ys) + shift])
+        ax.set_ylim([np.amin(ys) - shift, np.amax(ys) + shift])
 
-        plt.scatter(x, y, color='green')
-        X = np.linspace(np.amin(x) - shift, np.amax(x) + shift, 1000)
+        plt.scatter(xs, ys, color='green')
+        X = np.linspace(np.amin(xs) - shift, np.amax(xs) + shift, 1000)
         # predicted height function
         plt.plot(X, self.func(first_scalar, X), c='blue')
         plt.plot(X, self.func(last_scalar, X), c='red')
 
-        plt.title('2d_Nonlinear Regression')
+        plt.title(f'2d_Nonlinear Regression')
         plt.xlabel('X axis')
         plt.ylabel('Y axis')
 
@@ -230,9 +230,9 @@ class Drawer(object):
         return f'({point[0]:.2f}, {point[1]:.2f}) - {self.func(point):.5f}'
 
     def __complete_plot(self, directory, show_image):
-        os.makedirs(directory, exist_ok=True)
-        print(os.getcwd())
-        plt.savefig(f'{save_directory}/{directory}/scaler-{self.scaler_name}_method-{self.method_name}_batch-{self.batch_size}.png')
+        full_dir = f'{save_directory}/{directory}'
+        os.makedirs(full_dir, exist_ok=True)
+        plt.savefig(f'{full_dir}/scaler-{self.scaler_name}_method-{self.method_name}_batch-{self.batch_size}.png')
 
         if show_image:
             plt.show()

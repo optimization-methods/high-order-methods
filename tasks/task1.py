@@ -1,21 +1,74 @@
-def draw(descent_result, show=False):
-    drawer = Drawer(descent_result)
+import numpy as np
 
-    drawer.draw_2d_nonlinear_regression('pigis', show)
-    drawer.pigis(show)
-
-
-def test_gauss_newton():
-    draw(GaussNewtonDescentMethod(1, 2, 3, 'pigis'))
+from descent.methods.dogleg import DoglegDescentMethod
+from descent.methods.gauss_newton import GaussNewtonDescentMethod
+from utils.dataset_reader import DatasetReader
+from utils.drawer import Drawer
 
 
-def test_dogleg():
-    draw(DogLegDescentMethod(1, 2, 3, 'pigis'))
+def dogleg(xs, ys, f, start):
+    return DoglegDescentMethod(f, start=start, xs=xs, ys=ys)
 
 
-def compare_with_previous():
-    pass
+def gauss(xs, ys, f, start):
+    return GaussNewtonDescentMethod(f, start=start, xs=xs, ys=ys)
 
-# test_gauss_newton()
-# test_dogleg()
-# compare_with_previous()
+
+def draw_2d(method, xs, ys):
+    drawer = Drawer(method.converge())
+    drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)
+
+
+def draw_3d(method, x1, x2, y):
+    drawer = Drawer(method.converge())
+    drawer.draw_3d_nonlinear_regression(x1, x2, y, show_image=True)
+
+
+def test1():
+    def f(m_b, m_x):
+        accumulator = 0
+        for i in range(len(m_b)):
+            accumulator += m_b[i] * m_x ** i
+        return accumulator
+
+    data = DatasetReader('planar').parse()
+    xs = np.array(data.input)[:, 0]
+    ys = data.output
+    start = np.ones(10)
+
+    draw_2d(dogleg(xs, ys, f, start), xs, ys)
+    draw_2d(gauss(xs, ys, f, start), xs, ys)
+
+
+def test2():
+    def f(m_b, m_x):
+        return m_b[0] * m_x / (m_b[1] + m_x)
+
+    size = 50
+    xs = np.linspace(0, 5, size)
+    ys = f([2, 3], xs) + np.random.normal(0, 0.1, size=size)
+    start = [10, 10]
+
+    draw_2d(dogleg(xs, ys, f, start), xs, ys)
+    draw_2d(gauss(xs, ys, f, start), xs, ys)
+
+
+def test3():
+    def f(m_b, m_x):
+        return m_b[0] - (1 / m_b[1]) * m_x[:, 0] ** 2 - (1 / m_b[2]) * m_x[:, 1] ** 2
+
+    x1 = np.linspace(-5, 5, 100)
+    x2 = np.linspace(-5, 5, 100)
+    x1, x2 = np.meshgrid(x1, x2)
+    xs = np.column_stack([x1.ravel(), x2.ravel()])
+    ys = f([4, 3, 2], xs) + np.random.normal(0, 1, size=len(xs))
+    start = [1, 1, 1]
+
+    draw_3d(dogleg(xs, ys, f, start), x1, x2, ys)
+    draw_3d(gauss(xs, ys, f, start), x1, x2, ys)
+
+
+if __name__ == "__main__":
+    test1()
+    test2()
+    test3()

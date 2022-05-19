@@ -7,10 +7,10 @@ class DescentResult:
         self.rescaled_scalars = rescaled_scalars
         self.scaled_scalars = scaled_scalars
         self.func = func
+        self.method_name = method_name
 
         self.batch_size = batch_size
         self.scaler_name = scaler_name
-        self.method_name = method_name
 
         self.time = time
         self.memory = memory
