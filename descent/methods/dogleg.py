@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt, cm
 
 from descent.methods.descent_result import DescentResult
 from descent.methods.descent_method import DescentMethod
+import utils.config as config
 
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
@@ -15,53 +16,30 @@ from utils.drawer import Drawer
 mpl.use('TkAgg')
 
 
-def gradient(point):
-    eps = 1e-5
-    result = np.zeros(len(point))
-    for i, n in enumerate(point):
-        point[i] = point[i] + eps
-        f_plus = f(point)
-        point[i] = point[i] - 2 * eps
-        f_minus = f(point)
-        point[i] = point[i] + eps
-        result[i] = (f_plus - f_minus) / (2 * eps)
-
-    return result
+# def f(m_b, m_x):
+#     return m_b[0] * m_x / (m_b[1] + m_x)
 
 
-def Jacobian(b):
+def f(m_b, m_x):
+    accumulator = 0
+    for i in range(len(m_b)):
+        accumulator += m_b[i] * m_x ** i
+    return accumulator
+
+
+# def f(m_b, m_x):
+#     return m_b[0] - (1 / m_b[1]) * m_x[:, 0] ** 2 - (1 / m_b[2]) * m_x[:, 1] ** 2
+
+
+def Jacobian(b, x):
     eps = 1e-6
-
     grads = []
     for i in range(len(b)):
         t = np.zeros(len(b)).astype(float)
         t[i] = t[i] + eps
-        grad = (f(b + t) - f(b - t)) / (2 * eps)
+        grad = (f(b + t, x) - f(b - t, x)) / (2 * eps)
         grads.append(grad)
-
     return np.column_stack(grads)
-
-
-def f(m_b):
-    X, Y = np.array(DatasetReader('planar').input)[:, 0], np.array(DatasetReader('planar').output)
-    accumulator = 0
-    for j in range(len(Y)):
-        for i in range(len(m_b)):
-            accumulator += Y[j] - m_b[i] * X[j] ** i
-    return accumulator
-
-# def f(x):
-#     return (1 - x[0]) ** 2 + 100 * (x[1] - x[0] ** 2) ** 2
-#
-#
-# # Gradient
-# def jac(x):
-#     return np.array([-400 * (x[1] - x[0] ** 2) * x[0] - 2 + 2 * x[0], 200 * x[1] - 200 * x[0] ** 2])
-#
-#
-# # Hessian
-# def hess(x):
-#     return np.array([[1200 * x[0] ** 2 - 400 * x[1] + 2, -400 * x[0]], [-400 * x[0], 200]])
 
 
 def dogleg_method(g, H, trust_radius):
@@ -97,10 +75,10 @@ def dogleg_method(g, H, trust_radius):
     tau = (-dot_A_V + sqrt(fact)) / dot_V
 
     # Decide on which part of the trajectory to take.
-    return A + tau * (B - A)
+    return A + tau * V
 
 
-def trust_region_dogleg(x0, initial_trust_radius=1.0, eta=0.15, epoch=100):
+def trust_region_dogleg(x0, X, Y, initial_trust_radius=1.0, eta=0.15, epoch=30):
     tol = 1e-4
     max_trust_radius = 100.0
 
@@ -111,20 +89,21 @@ def trust_region_dogleg(x0, initial_trust_radius=1.0, eta=0.15, epoch=100):
 
     trust_radius = initial_trust_radius
     for i in range(epoch):
-        gk = gradient(point)
-        print(gk)
-        Bk = Jacobian(point)
-        print(Bk)
+        dy = Y - f(point, X)
+        J = Jacobian(point, X)
+        g = - 2 * J.T @ dy
+        H = 2 * J.T @ J
 
-        direction = dogleg_method(gk, Bk, trust_radius)
+        direction = dogleg_method(g, H, trust_radius)
 
-        act_red = f(point) - f(point + direction)
-        pred_red = -(np.dot(gk, direction) + 0.5 * np.dot(direction, np.dot(Bk, direction)))
+        new_dy = Y - f(point + direction, X)
+
+        act_red = np.sum(dy ** 2) - np.sum(new_dy ** 2)
+        pred_red = -(np.dot(g, direction) + 0.5 * np.dot(direction, np.dot(H, direction)))
+
         rhok = act_red / pred_red
-        # if pred_red == 0.0:
-        #     rhok = 1e99
-        # else:
-        #     rhok = act_red / pred_red
+        if pred_red == 0.0:
+            rhok = 1e99
 
         norm_pk = sqrt(np.dot(direction, direction))
         if rhok < 0.25:
@@ -141,39 +120,46 @@ def trust_region_dogleg(x0, initial_trust_radius=1.0, eta=0.15, epoch=100):
             point = point
 
         points.append(point.tolist())
-
-        if ln.norm(gk) < tol:
+        if ln.norm(g) < tol:
             break
 
-    return points
-    # return DescentResult(points, points, f, method_name='Dogleg')
+    # return point
+    print(points[-1])
+    return DescentResult(points, points, f, method_name='Dogleg')
 
 
-def test(result):
-    result = trust_region_dogleg(result)
-    print(result)
-    # drawer = Drawer(result)
-    # drawer.draw_2d_nonlinear_regression(X, Y, show_image=True)
+def test(result, start, stop, size):
+    data = DatasetReader('planar').parse()
+    X, Y = np.array(data.input)[:, 0], np.array(data.output)
+    result = trust_region_dogleg(result, X, Y)
+
+    # X = np.linspace(start, stop, size)
+    # Y = f([2, 3], X) + np.random.normal(0, 0.1, size=size)
+    # result = trust_region_dogleg(result, X, Y)
+
+    # X1 = np.linspace(start, stop, size)
+    # X2 = np.linspace(start, stop, size)
+    # X1, X2 = np.meshgrid(X1, X2)
+    # X = np.column_stack([X1.ravel(), X2.ravel()])
+    # Y = f([2, 3, 1], X) + np.random.normal(0, 1, size=len(X))
+    # result = trust_region_dogleg(result, X, Y)
+
+    drawer = Drawer(result)
+    drawer.draw_2d_nonlinear_regression(X, Y, show_image=True)
+    # drawer.draw_3d_nonlinear_regression(X1, X2, Y, show_image=True)
 
 
 def main():
-    # np.set_printoptions(suppress=True)
-    # result = np.array([arr.tolist() for arr in trust_region_dogleg(f, [5, 5])])[::4]
-
-    # result = trust_region_dogleg(f, [5, 5])
-    # drawer = Drawer(result)
-    # drawer.draw_3d(show_image=True)
-
-    test([1, 1])
+    np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
+    test(np.ones(10), -5, 5, 100)
 
 
 if __name__ == '__main__':
     main()
 
-
-class DogLegDescentMethod(DescentMethod):
-    def __init__(self, config):
-        config.fistingate()
-
-    def converge(self):
-        return DescentResult('pigis')
+# class DogLegDescentMethod(DescentMethod):
+#     def __init__(self, config):
+#         config.fistingate()
+#
+#     def converge(self):
+#         return DescentResult('pigis')

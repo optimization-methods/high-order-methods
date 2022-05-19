@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt, cm
 # from utils.config import dtype
 import utils.config as config
 
-save_directory = "../images"
+save_directory = "../../images"
 
 
 class SurfaceConfig(object):
@@ -73,7 +73,7 @@ class Drawer(object):
 
         x1, x2 = np.meshgrid(x1, x2)
         x = np.column_stack([x1.ravel(), x2.ravel()])
-        z = np.array([self.func(p) for p in x], dtype=dtype_).reshape(amount, amount)
+        z = np.array([self.func(p) for p in x], dtype=config.dtype).reshape(amount, amount)
 
         return x1, x2, z
 
@@ -118,7 +118,7 @@ class Drawer(object):
         ax.set_ylabel('$Y$')
         ax.set_zlabel('$Z$')
 
-        self.__complete_plot('./img/3d', show_image)
+        self.__complete_plot('3d', show_image)
 
     '''
     Requires a function already built from x and y.
@@ -181,7 +181,7 @@ class Drawer(object):
         plt.xlabel('X axis')
         plt.ylabel('Y axis')
 
-        self.__complete_plot('./img/linear_regression', show_image)
+        self.__complete_plot('linear_regression', show_image)
 
     '''
     Requires only predicted height function.
@@ -205,7 +205,7 @@ class Drawer(object):
         plt.xlabel('X axis')
         plt.ylabel('Y axis')
 
-        self.__complete_plot('./img/2d_nonlinear_regression', show_image)
+        self.__complete_plot('2d_nonlinear_regression', show_image)
 
     '''
     Requires only predicted height function.
@@ -224,13 +224,14 @@ class Drawer(object):
         ax.set_ylabel('$Y$')
         ax.set_zlabel('$Z$')
 
-        self.__complete_plot('./img/3d_nonlinear_regression', show_image)
+        self.__complete_plot('3d_nonlinear_regression', show_image)
 
     def __point_text(self, point):
         return f'({point[0]:.2f}, {point[1]:.2f}) - {self.func(point):.5f}'
 
     def __complete_plot(self, directory, show_image):
         os.makedirs(directory, exist_ok=True)
+        print(os.getcwd())
         plt.savefig(f'{save_directory}/{directory}/scaler-{self.scaler_name}_method-{self.method_name}_batch-{self.batch_size}.png')
 
         if show_image:

@@ -42,11 +42,8 @@ def Gauss_Newton(m_f, x, y, b0, epoch):
     for itr in range(epoch):
         old = new
         J = Jacobian(m_f, old, x)
-        print(f'{J=}')
-
         dy = y - np.array([m_f(old, *p) for p in x])
         new = old + np.linalg.inv(J.T @ J) @ J.T @ dy
-
         points.append(new)
 
         if np.linalg.norm(old - new) < tolerance:
@@ -78,7 +75,7 @@ def two_dim_dataset(result):
             accumulator += m_b[i] * m_x ** i
         return accumulator
 
-    data = DatasetReader('planar')
+    data = DatasetReader('planar').parse()
     X, Y = np.array(data.input)[:, 0], np.array(data.output)
 
     result = Gauss_Newton(f, X, Y, result, epoch=10)
