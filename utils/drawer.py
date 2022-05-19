@@ -218,7 +218,8 @@ class Drawer(object):
         ax = fig.add_subplot(111, projection='3d')
 
         ax.scatter(X1, X2, Y, c='green')
-        ax.plot_surface(X1, X2, self.func(last_scalar, X1, X2), cmap=cm.coolwarm)
+        x = np.column_stack([X1.ravel(), X2.ravel()])
+        ax.plot_surface(X1, X2, self.func(last_scalar, x).reshape(len(X1), len(X2)), cmap=cm.coolwarm)
 
         ax.set_xlabel('$X$')
         ax.set_ylabel('$Y$')

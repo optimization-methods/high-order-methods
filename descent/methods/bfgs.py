@@ -108,15 +108,19 @@ class LineSearch(object):
         # print('fuck')
 
 
+def r_func(m_b, m_x):
+    accumulator = 0
+    for i in range(len(m_b)):
+        accumulator += m_b[i] * m_x ** i
+    return accumulator
+
+
+def f(m_b, m_x, m_y):
+    return np.sum((m_y - r_func(m_b, m_x)) ** 2)
+
+
 # def f(m_b, m_x):
-#     accumulator = 0
-#     for i in range(len(m_b)):
-#         accumulator += m_b[i] * m_x ** i
-#     return accumulator
-
-
-def f(m_b, m_x):
-    return m_b[0] * m_x / (m_b[1] + m_x)
+#     return m_b[0] * m_x / (m_b[1] + m_x)
 
 
 def Jacobian(b, x):
@@ -125,17 +129,22 @@ def Jacobian(b, x):
     for i in range(len(b)):
         t = np.zeros(len(b)).astype(float)
         t[i] = t[i] + eps
-        grad = (f(b + t, x) - f(b - t, x)) / (2 * eps)
+        grad = (r_func(b + t, x) - r_func(b - t, x)) / (2 * eps)
         grads.append(grad)
     return np.column_stack(grads)
 
 
-def bfgs_method(x0, X, Y, eps=10e-3):
-    dy = Y - f(x0, X)
-    J = Jacobian(x0, X)
-    g = -2 * J.T @ dy
+def gradient(x, X, Y):
+    dy = Y - r_func(x, X)
+    J = Jacobian(x, X)
+    return -2 * J.T @ dy
 
-    H = np.eye(len(x0), dtype=int)
+
+def bfgs_method(x0, X, Y, eps=10e-3):
+    g = gradient(x0, X, Y)
+
+    I = np.eye(len(x0), dtype=np.float)
+    H = I
 
     points = [x0]
     while ln.norm(g) > eps:
@@ -151,17 +160,15 @@ def bfgs_method(x0, X, Y, eps=10e-3):
         step = x1 - x0
         x0 = x1
 
-        dy = Y - f(x1, X)
-        J = Jacobian(x1, X)
-        new_g = - 2 * J.T @ dy
+        new_g = gradient(x1, X, Y)
 
         g_diff = new_g - g
         g = new_g
 
         ro = 1.0 / (np.dot(g_diff, step))
 
-        A1 = np.eye(len(x0), dtype=int) - ro * step[:, np.newaxis] * g_diff[np.newaxis, :]
-        A2 = np.eye(len(x0), dtype=int) - ro * g_diff[:, np.newaxis] * step[np.newaxis, :]
+        A1 = I - ro * step[:, np.newaxis] * g_diff[np.newaxis, :]
+        A2 = I - ro * g_diff[:, np.newaxis] * step[np.newaxis, :]
         H = np.dot(A1, np.dot(H, A2)) + (ro * step[:, np.newaxis] * step[np.newaxis, :])
 
         points.append(x0.tolist())
@@ -173,13 +180,13 @@ def bfgs_method(x0, X, Y, eps=10e-3):
 def main():
     np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
-    # data = DatasetReader('planar').parse()
-    # X, Y = np.array(data.input)[:, 0], np.array(data.output)
-    # result = bfgs_method(np.ones(5), X, Y)
+    data = DatasetReader('planar').parse()
+    X, Y = np.array(data.input)[:, 0], np.array(data.output)
+    result = bfgs_method(np.ones(10), X, Y)
 
-    X = np.linspace(1, 5, 50)
-    Y = f([2, 3], X) + np.random.normal(0, 0.1, size=50)
-    result = bfgs_method([10, 10], X, Y)
+    # X = np.linspace(1, 5, 50)
+    # Y = f([2, 3], X) + np.random.normal(0, 0.1, size=50)
+    # result = bfgs_method([10, 10], X, Y)
 
     drawer = Drawer(result)
     drawer.draw_2d_nonlinear_regression(X, Y, show_image=True)

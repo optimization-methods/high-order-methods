@@ -49,7 +49,7 @@ def two_dim(initial, start, stop, size):
 
     result = Gauss_Newton(f, X, Y, initial, epoch=10)
     drawer = Drawer(result)
-    drawer.draw_2d_nonlinear_regression(X, Y, show_image=True)
+    drawer.draw_2d_nonlinear_regression(show_image=True)
 
 
 def two_dim_dataset(result):
@@ -64,7 +64,7 @@ def two_dim_dataset(result):
 
     result = Gauss_Newton(f, X, Y, result, epoch=10)
     drawer = Drawer(result)
-    drawer.draw_2d_nonlinear_regression(X, Y, show_image=True)
+    drawer.draw_2d_nonlinear_regression(show_image=True)
 
 
 def three_dim(c, start, stop, size):
@@ -86,8 +86,8 @@ def three_dim(c, start, stop, size):
 def main():
     np.set_printoptions(suppress=True)
     two_dim_dataset(np.ones(10))
-    # two_dim([1, 1], 1, 5, 50)
-    # three_dim([1, 1, 1], -5, 5, 100)
+    two_dim([1, 1], 1, 5, 50)
+    three_dim([1, 1, 1], -5, 5, 100)
 
 
 if __name__ == '__main__':
