@@ -20,13 +20,14 @@ def draw_2d(method, xs, ys):
     drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)
 
 
-def draw_3d(method, x1, x2, y):
+def draw_3d(method, xs1, xs2, y):
     drawer = Drawer(method.converge())
-    drawer.draw_3d_nonlinear_regression(x1, x2, y, show_image=True)
+    drawer.draw_3d_nonlinear_regression(xs1, xs2, y, show_image=True)
 
 
 def test1():
     def f(m_b, m_x):
+        m_x = np.array(m_x, dtype=config.dtype)
         accumulator = 0
         for i in range(len(m_b)):
             accumulator += m_b[i] * m_x ** i
@@ -46,9 +47,9 @@ def test2():
         return m_b[0] * m_x / (m_b[1] + m_x)
 
     size = 50
-    xs = np.linspace(0, 5, size)
+    xs = np.linspace(1, 5, size)
     ys = f([2, 3], xs) + np.random.normal(0, 0.1, size=size)
-    start = [10, 10]
+    start = [1, 1]
 
     draw_2d(dogleg(xs, ys, f, start), xs, ys)
     draw_2d(gauss(xs, ys, f, start), xs, ys)

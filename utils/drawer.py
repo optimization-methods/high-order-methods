@@ -187,12 +187,12 @@ class Drawer(object):
     Requires only predicted height function.
     Possible many parameters.
     '''
-    def draw_2d_nonlinear_regression(self, xs, ys, shift=2, show_image=True):
+    def draw_2d_nonlinear_regression(self, xs, ys, shift=1, show_image=True):
         first_scalar = self.rescaled[0]
         last_scalar = self.rescaled[-1]
 
         ax = plt.gca()
-        ax.set_xlim([np.amin(xs) - shift, np.amax(ys) + shift])
+        ax.set_xlim([np.amin(xs) - shift, np.amax(xs) + shift])
         ax.set_ylim([np.amin(ys) - shift, np.amax(ys) + shift])
 
         plt.scatter(xs, ys, color='green')

@@ -237,19 +237,23 @@ class BFGS(object):
     #
     #     return self.start
 
+
 def main():
+    # def r_func(m_b, m_x):
+    #     return m_b[0] * m_x / (m_b[1] + m_x)
+
     np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
     data = DatasetReader('planar').parse()
-    X, Y = np.array(data.input)[:, 0], np.array(data.output)
-    result = bfgs_method(np.ones(10), X, Y)
+    xs, ys = np.array(data.input)[:, 0], np.array(data.output)
+    result = BFGS(np.ones(10), xs, ys).evaluate()
 
-    # X = np.linspace(1, 5, 50)
-    # Y = f([2, 3], X) + np.random.normal(0, 0.1, size=50)
-    # result = bfgs_method([10, 10], X, Y)
+    # xs = np.linspace(1, 5, 50)
+    # ys = r_func([2, 3], xs) + np.random.normal(0, 1, size=50)
+    # result = BFGS([10, 10], xs, ys).evaluate()
 
     drawer = Drawer(result)
-    drawer.draw_2d_nonlinear_regression(X, Y, show_image=True)
+    drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)
 
 
 if __name__ == '__main__':

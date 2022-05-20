@@ -201,4 +201,5 @@ class DoglegDescentMethod(DescentMethod):
             if ln.norm(g) < self.tol:
                 break
 
+        print(points[-1])
         return DescentResult(points, points, self.func, method_name='Dogleg')
