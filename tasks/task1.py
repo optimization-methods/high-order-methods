@@ -2,6 +2,7 @@ import numpy as np
 
 from descent.methods.dogleg import DoglegDescentMethod
 from descent.methods.gauss_newton import GaussNewtonDescentMethod
+from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
 

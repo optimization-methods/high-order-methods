@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import scipy.optimize
 
 from descent.methods.descent_result import DescentResult
+from descent.methods.line_search import grad, special_grad, g
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
 
@@ -31,13 +32,6 @@ def Jacobian(b, x):
         grad = (r_func(b + t, x) - r_func(b - t, x)) / (2 * eps)
         grads.append(grad)
     return np.column_stack(grads)
-
-
-def grad(b, x, y):
-    dy = y - r_func(b, x)
-    J = Jacobian(b, x)
-    return -2 * J.T @ dy
-
 
 def line_search(x0, X, Y, p, nabla):
     a = 1
