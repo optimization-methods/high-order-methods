@@ -32,6 +32,7 @@ def Jacobian(b, x):
         grads.append(grad)
     return np.column_stack(grads)
 
+
 def line_search(x0, X, Y, p, nabla):
     a = 1
     c1 = 1e-4

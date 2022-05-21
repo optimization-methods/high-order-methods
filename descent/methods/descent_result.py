@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class DescentResult:
     def __init__(self,
                  rescaled_scalars, scaled_scalars,

@@ -254,4 +254,9 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    a = [1, 2, 3]
+    b = a
+    a[1] = 3
+    print(a)  # [1, 2, 3]
+    print(b)  # [1, 3, 3]

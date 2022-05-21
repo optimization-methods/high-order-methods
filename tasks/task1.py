@@ -17,6 +17,14 @@ def gauss(xs, ys, f, start):
     return GaussNewtonDescentMethod(f, start=start, xs=xs, ys=ys)
 
 
+def bfgs(xs, ys, f, start):
+    return BfgsDescentMethod(f, start=start, xs=xs, ys=ys)
+
+
+def l_bfgs(xs, ys, f, start):
+    return LBfgsDescentMethod(f, start=start, xs=xs, ys=ys)
+
+
 def draw_2d(method, xs, ys):
     drawer = Drawer(method.converge())
     drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)
@@ -55,6 +63,7 @@ def test2():
 
     draw_2d(dogleg(xs, ys, f, start), xs, ys)
     draw_2d(gauss(xs, ys, f, start), xs, ys)
+    draw_2d(bfgs(xs, ys, f, start), xs, ys)
 
 
 def test3():
