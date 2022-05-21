@@ -138,131 +138,72 @@ class BfgsDescentMethod(object):
                 k += 1
             return alpha
 
-    # def r_func(self, m_b, m_x):
-    #     return m_b[0] * m_x / (m_b[1] + m_x)
+    def __init__(self, r, start, xs, ys):
+        self.start = start
+        self.r = r
+        self.xs = xs
+        self.ys = ys
+        self.eps = 10e-3
 
-    def r_func(self, m_b, m_x):
-        accumulator = 0
-        for i in range(len(m_b)):
-            accumulator += 1 / m_b[i] * m_x ** i
-        return accumulator
-
-    def f(self, m_b):
-        return np.sum(self.dy(m_b) ** 2)
+    def f(self, b):
+        return np.sum(self.dy(b) ** 2)
 
     def dy(self, b):
-        return self.ys - self.r_func(b, self.xs)
+        return self.ys - self.r(b, self.xs)
 
-    def Jacobian(self, b, eps=1e-6):
+    def jacobian(self, b, eps=1e-6):
         grads = []
         for i in range(len(b)):
             t = np.zeros(len(b)).astype(float)
             t[i] = t[i] + eps
-            grad = (self.r_func(b + t, self.xs) - self.r_func(b - t, self.xs)) / (2 * eps)
+            grad = (self.r(b + t, self.xs) - self.r(b - t, self.xs)) / (2 * eps)
             grads.append(grad)
         return np.column_stack(grads)
 
     def gradient(self, x):
         dy = self.dy(x)
-        J = self.Jacobian(x)
-        return -2 * J.T @ dy
-    
-    def hessian(self, x):
-        J = self.Jacobian(x)
-        return 2 * J.T @ J
+        jacobian = self.jacobian(x)
+        return -2 * jacobian.T @ dy
 
-    def wolfe(self, x_k, p_k, alpha=1, c1=1e-4, c2=0.9, rho=0.8):
-        k = 0
-        maxIt = 20
-        jok = self.f(x_k + alpha * p_k)
-        cok = self.f(x_k) + c1 * (alpha * self.gradient(x_k).T @ p_k)
-        pig = (self.gradient(x_k + alpha * p_k).T @ p_k)
-        swi = c2 * (self.gradient(x_k).T @ p_k)
-        print('COK', self.gradient(x_k).T, p_k, sep='\n')
-        print(jok, cok, pig, swi, sep='\nJOK\n')
-        while (k < maxIt) and ((jok > cok) or (pig < swi)):  # condition 2
-            alpha *= rho
-            k += 1
-        return alpha
+    def converge(self):
+        g = self.gradient(self.start)
+        I = np.eye(len(self.start), dtype=config.dtype)
+        H = I
+        points = [self.start]
+        x0 = points[-1]
+        while ln.norm(g) > self.eps:
+            direction = -np.dot(H, g)
 
-    def evaluate(self):
-        result = [
-            np.ones(10).tolist(),
-            scipy.optimize.minimize(self.f, self.start, jac=self.Jacobian, method='bfgs').x
-        ]
+            alpha = self.LineSearch(x0, direction, self).wolfe()
 
-        return DescentResult(result, result, self.r_func, 'PIG')
+            x1 = x0 + alpha * direction
+            step = x1 - x0
+            x0 = x1
 
-        # g = self.gradient(self.start)
-        # I = np.eye(len(self.start), dtype=config.dtype)
-        # H = I
-        # points = [self.start]
-        # x0 = points[-1]
-        # while ln.norm(g) > self.eps:
-        #     direction = -np.dot(H, g)
-        #
-        #     # alpha = LineSearch(x0=x0, xs=self.xs, ys=self.ys, r_func=self.r_func).evaluate()
-        #     # alpha = LineSearch(x0, direction, X, Y).line_search1(0.01)
-        #     # alpha = scipy.optimize.line_search(self.f, self.gradient, x0, direction)[0]
-        #     alpha = self.wolfe(x0, direction)
-        #     from scipy.optimize import minimize
-        #
-        #     x1 = x0 + alpha * direction
-        #     step = x1 - x0
-        #     x0 = x1
-        #
-        #     new_g = self.gradient(x1)
-        #     g_diff = new_g - g
-        #     g = new_g
-        #
-        #     ro = 1.0 / (np.dot(g_diff, step))
-        #
-        #     A1 = I - ro * step[:, np.newaxis] * g_diff[np.newaxis, :]
-        #     A2 = I - ro * g_diff[:, np.newaxis] * step[np.newaxis, :]
-        #     H = np.dot(A1, np.dot(H, A2)) + (ro * step[:, np.newaxis] * step[np.newaxis, :])
-        #
-        #     points.append(x0.tolist())
-        #
-        # print(points[-1])
-        # return DescentResult(points, points, self.r_func, 'BFGS')
+            new_g = self.gradient(x1)
+            g_diff = new_g - g
+            g = new_g
 
-    # def BFGS_пиговый(self):
-    #     epsilon = 1e-4  # iteration condtion
-    #     m = np.shape(self.start)[0]
-    #     # B_k = eye(m)
-    #     H_k = np.eye(m)
-    #     I = np.eye(m)
-    #     y_array = [self.f(self.start)]
-    #     k = 1
-    #     while abs(self.gradient(self.start)[0]) > epsilon:
-    #         g_k = np.mat(self.gradient(self.start))
-    #         p_k = - 1.0 * np.mat(H_k) * g_k
-    #         # p_k = mat(-linalg.solve(B_k, g_k)) # search direction
-    #         # alpha_k = LineSearch(x0=self.start, xs=self.xs, ys=self.ys, r_func=self.r_func).evaluate()
-    #         # alpha_k = wolfe(self.start, p_k)
-    #         x_k_old = self.start.copy()
-    #         self.start += p_k * alpha_k
-    #         g_k_old = g_k
-    #         g_k = np.mat(self.gradient(self.start))
-    #         s_k = self.start - x_k_old
-    #         y_k = g_k - g_k_old
-    #
-    #         if s_k.T * y_k > 0:
-    #             H_k = (I - (s_k * y_k.T) / (y_k.T * s_k)) * H_k * (I - (y_k * s_k.T) / (y_k.T * s_k)) + s_k * s_k.T / (
-    #                         y_k.T * s_k)
-    #             # B_k = B_k - 1.0 * (B_k * s_k * s_k.T * B_k) / (s_k.T * B_k * s_k)\
-    #             #       + 1.0 * (y_k * y_k.T) / (s_k.T * y_k)
-    #
-    #         k += 1
-    #         y_array.append(self.f(self.start))
-    #         print(k)
-    #
-    #     return self.start
+            ro = 1.0 / (np.dot(g_diff, step))
+
+            A1 = I - ro * step[:, np.newaxis] * g_diff[np.newaxis, :]
+            A2 = I - ro * g_diff[:, np.newaxis] * step[np.newaxis, :]
+            H = np.dot(A1, np.dot(H, A2)) + (ro * step[:, np.newaxis] * step[np.newaxis, :])
+
+            points.append(x0.tolist())
+
+        return DescentResult(points, points, self.r, 'BFGS')
 
 
 def main():
-    # def r_func(m_b, m_x):
-    #     return m_b[0] * m_x / (m_b[1] + m_x)
+    # def r(m_b, m_x):
+    #     accumulator = 0
+    #     for i in range(len(m_b)):
+    #         accumulator += m_b[i] * m_x ** i
+    #     return accumulator
+
+    def r(m_b, m_x):
+        return m_b[0] * m_x / (m_b[1] + m_x)
 
     np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
@@ -270,18 +211,13 @@ def main():
     # xs, ys = np.array(data.input)[:, 0], np.array(data.output)
     # result = BfgsDescentMethod(r, np.ones(10), xs, ys).evaluate()
 
-    # xs = np.linspace(1, 5, 50)
-    # ys = r_func([2, 3], xs) + np.random.normal(0, 1, size=50)
-    # result = BFGS([10, 10], xs, ys).evaluate()
+    xs = np.linspace(1, 5, 50)
+    ys = r([2, 3], xs) + np.random.normal(0, 0.1, size=50)
+    result = BfgsDescentMethod(r, [10, 10], xs, ys).converge()
 
     drawer = Drawer(result)
     drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)
 
 
 if __name__ == '__main__':
-    # main()
-    a = [1, 2, 3]
-    b = a
-    a[1] = 3
-    print(a)  # [1, 2, 3]
-    print(b)  # [1, 3, 3]
+    main()
