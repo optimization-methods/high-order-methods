@@ -1,10 +1,8 @@
 import matplotlib as mpl
 import numpy as np
-import numpy.linalg as ln
 import scipy.optimize
 
 from descent.methods.descent_result import DescentResult
-from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
 
@@ -108,8 +106,7 @@ mpl.use('TkAgg')
 #     pass
 
 
-# noinspection PyPep8Naming
-class BFGS(object):
+class BfgsDescentMethod(object):
     def __init__(self, x0, xs, ys):
         self.start = x0
         self.xs = xs

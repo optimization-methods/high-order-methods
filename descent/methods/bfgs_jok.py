@@ -1,9 +1,7 @@
 import numpy as np
-from matplotlib import pyplot as plt
 
 from utils import config
 from utils.dataset_reader import DatasetReader
-from utils.drawer import Drawer
 
 
 def line_search(fun, grad, x, p, maxiter=100, c1=10 ** (-3), c2=0.9, alpha_1=1.0, alpha_max=10 ** 6):

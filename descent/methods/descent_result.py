@@ -15,3 +15,11 @@ class DescentResult:
         self.time = time
         self.memory = memory
         self.grad_calls = grad_calls
+
+    def __str__(self):
+        np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
+
+        return '%s(\n\t%s)' % (
+            type(self).__name__,
+            ',\n\t'.join('%s=%s' % item for item in vars(self).items())
+        )

@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 import scipy.optimize
 
 from descent.methods.descent_result import DescentResult
-from descent.methods.line_search import grad, special_grad, g
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
 

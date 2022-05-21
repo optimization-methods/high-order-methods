@@ -1,7 +1,9 @@
 import numpy as np
 
+from descent.methods.bfgs import BfgsDescentMethod
 from descent.methods.dogleg import DoglegDescentMethod
 from descent.methods.gauss_newton import GaussNewtonDescentMethod
+from descent.methods.l_bfgs import LBfgsDescentMethod
 from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
@@ -68,6 +70,7 @@ def test3():
 
     draw_3d(dogleg(xs, ys, f, start), x1, x2, ys)
     draw_3d(gauss(xs, ys, f, start), x1, x2, ys)
+    draw_3d(bfgs(xs, ys, f, start), x1, x2, ys)
 
 
 if __name__ == "__main__":
