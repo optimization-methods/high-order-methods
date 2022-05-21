@@ -1,4 +1,4 @@
-import matplotlib as mpl
+
 import numpy as np
 import numpy.linalg as ln
 
@@ -7,7 +7,6 @@ from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
 
-mpl.use('TkAgg')
 
 # noinspection PyPep8Naming
 class BfgsDescentMethod(object):
@@ -73,6 +72,7 @@ class BfgsDescentMethod(object):
         H = I.copy()
         points = [self.start]
         x0 = points[-1]
+
         while ln.norm(g) > self.eps:
             direction = -np.dot(H, g)
 
@@ -94,6 +94,7 @@ class BfgsDescentMethod(object):
 
             points.append(x0.tolist())
 
+        print(points[-1])
         return DescentResult(points, points, self.r, 'BFGS')
 
 

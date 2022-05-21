@@ -201,7 +201,7 @@ class Drawer(object):
         plt.plot(X, self.func(first_scalar, X), c='blue')
         plt.plot(X, self.func(last_scalar, X), c='red')
 
-        plt.title(f'2d_Nonlinear Regression')
+        plt.title(f'2d_Nonlinear Regression - {self.method_name}')
         plt.xlabel('X axis')
         plt.ylabel('Y axis')
 

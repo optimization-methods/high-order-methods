@@ -17,7 +17,6 @@ def gauss(xs, ys, f, start):
     return GaussNewtonDescentMethod(f, start=start, xs=xs, ys=ys)
 
 
-# noinspection SpellCheckingInspection
 def bfgs(xs, ys, f, start):
     return BfgsDescentMethod(f, start=start, xs=xs, ys=ys)
 
@@ -63,7 +62,7 @@ def test2():
     size = 50
     xs = np.linspace(1, 5, size)
     ys = f([2, 3], xs) + np.random.normal(0, 0.1, size=size)
-    start = [1, 1]
+    start = [10, 10]
 
     draw_2d(dogleg(xs, ys, f, start), xs, ys)
     draw_2d(gauss(xs, ys, f, start), xs, ys)

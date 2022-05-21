@@ -131,7 +131,7 @@ class DoglegDescentMethod(DescentMethod):
         self.eta = eta
         self.epoch = epoch
 
-    def get_jacobian(self, b, x):
+    def jacobian(self, b, x):
         eps = 1e-6
         grads = []
         for i in range(len(b)):
