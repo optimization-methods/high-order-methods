@@ -1,8 +1,9 @@
 import matplotlib as mpl
 import numpy as np
-import scipy.optimize
+import numpy.linalg as ln
 
 from descent.methods.descent_result import DescentResult
+from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
 
@@ -106,12 +107,36 @@ mpl.use('TkAgg')
 #     pass
 
 
+# noinspection PyPep8Naming
 class BfgsDescentMethod(object):
-    def __init__(self, x0, xs, ys):
-        self.start = x0
-        self.xs = xs
-        self.ys = ys
-        self.eps = 10e-3
+    class LineSearch(object):
+        # noinspection SpellCheckingInspection
+        def __init__(self, point, d, bfgs):
+            self.point = point
+            self.d = d
+            self.bfgs = bfgs
+
+        def g(self, alpha):
+            return self.bfgs.f(self.point + alpha * self.d)
+
+        def grad(self, alpha):
+            return self.bfgs.gradient(self.point + alpha * self.d)
+
+        def data(self, alpha):
+            return self.g(alpha), self.grad(alpha).T @ self.d
+
+        def wolfe(self, epoch=20, alpha=1, c1=1e-4, c2=0.9, rho=0.8):
+            k = 0
+            g_0, gamma_0 = self.data(0)
+            while True:
+                g_alpha, gamma_alpha = self.data(alpha)
+                first = (g_alpha > g_0 + c1 * (alpha * gamma_0))
+                second = (gamma_alpha < c2 * gamma_0)
+                if (k < epoch) and (first or second):
+                    break
+                alpha *= rho
+                k += 1
+            return alpha
 
     # def r_func(self, m_b, m_x):
     #     return m_b[0] * m_x / (m_b[1] + m_x)
@@ -241,9 +266,9 @@ def main():
 
     np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
-    data = DatasetReader('planar').parse()
-    xs, ys = np.array(data.input)[:, 0], np.array(data.output)
-    result = BFGS(np.ones(10), xs, ys).evaluate()
+    # data = DatasetReader('planar').parse()
+    # xs, ys = np.array(data.input)[:, 0], np.array(data.output)
+    # result = BfgsDescentMethod(r, np.ones(10), xs, ys).evaluate()
 
     # xs = np.linspace(1, 5, 50)
     # ys = r_func([2, 3], xs) + np.random.normal(0, 1, size=50)

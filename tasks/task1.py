@@ -17,6 +17,7 @@ def gauss(xs, ys, f, start):
     return GaussNewtonDescentMethod(f, start=start, xs=xs, ys=ys)
 
 
+# noinspection SpellCheckingInspection
 def bfgs(xs, ys, f, start):
     return BfgsDescentMethod(f, start=start, xs=xs, ys=ys)
 

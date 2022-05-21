@@ -155,10 +155,10 @@ class DoglegDescentMethod(DescentMethod):
             return trust_radius * A / sqrt(dot_A)
 
         V = B - A
-        dot_V = np.dot(V, V)
+        Dot_V = np.dot(V, V)
         dot_A_V = np.dot(A, V)
-        fact = dot_A_V ** 2 - dot_V * (dot_A - trust_radius ** 2)
-        tau = (-dot_A_V + sqrt(fact)) / dot_V
+        fact = dot_A_V ** 2 - Dot_V * (dot_A - trust_radius ** 2)
+        tau = (-dot_A_V + sqrt(fact)) / Dot_V
 
         return A + tau * V
 
