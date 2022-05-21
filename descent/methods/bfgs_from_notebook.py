@@ -74,8 +74,9 @@ def zoom(x, p, phi, phi_grad, alpha_lo, alpha_hi, c1, c2, eps=1e-22):
             if phi_grad_alpha_j * (alpha_hi - alpha_lo) >= 0:
                 print(f'pigs happened {alpha_hi=} {alpha_lo=}')
                 alpha_hi = alpha_lo
+                return alpha_hi
                 # alpha_lo, alpha_hi = alpha_hi, alpha_lo
-
+                # continue
             alpha_lo = alpha_j
     # return alpha_lo
 
@@ -126,7 +127,8 @@ class BFGS(object):
             # Search direction
             p = -1 * np.dot(H_old, self.grad(x_old))
 
-            alpha = line_search(self.f, self.grad, x_old, p, maxiter=max_iterations)
+            # alpha = line_search(self.f, self.grad, x_old, p, maxiter=max_iterations)
+            alpha = 0.0000000000000001
 
             if alpha is None:
                 print('Wolfe line search did not converge')
@@ -182,7 +184,7 @@ def main():
         accumulator = 0
         for i in range(len(m_b)):
             accumulator += m_b[i] * m_x ** i
-        return np.exp(accumulator)
+        return accumulator
 
     # def r(m_b, m_x):
     #     return m_b[0] * m_x / (m_b[1] + m_x)

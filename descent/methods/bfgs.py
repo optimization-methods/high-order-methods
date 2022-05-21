@@ -70,7 +70,7 @@ class BfgsDescentMethod(object):
     def converge(self):
         g = self.gradient(self.start)
         I = np.eye(len(self.start), dtype=config.dtype)
-        H = I
+        H = I.copy()
         points = [self.start]
         x0 = points[-1]
         while ln.norm(g) > self.eps:

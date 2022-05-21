@@ -27,7 +27,10 @@ def l_bfgs(xs, ys, f, start):
 
 
 def draw_2d(method, xs, ys):
-    drawer = Drawer(method.converge())
+    print('testing...')
+    result = method.converge()
+    print(result.method_name + ' converged')
+    drawer = Drawer(result)
     drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)
 
 

@@ -171,7 +171,7 @@ class DoglegDescentMethod(DescentMethod):
         trust_radius = self.initial_trust_radius
         for i in range(self.epoch):
             dy = self.ys - self.func(point, self.xs)
-            jacobian = self.get_jacobian(point, self.xs)
+            jacobian = self.jacobian(point, self.xs)
             g = -2 * jacobian.T @ dy
             hessian = 2 * jacobian.T @ jacobian
 
