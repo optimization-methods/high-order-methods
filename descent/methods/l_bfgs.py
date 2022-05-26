@@ -114,8 +114,7 @@ class LBfgsDescentMethod(DescentMethod):
                 (
                         self.f(x_k + alpha * p_k) >
                         self.f(x_k) + c1 * (alpha * x_k.T @ p_k)
-                ) or
-                (
+                ) or (
                         self.grad(x_k + alpha * p_k).T @ p_k <
                         c2 * self.grad(x_k).T @ p_k
                 )
