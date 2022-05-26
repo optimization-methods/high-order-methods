@@ -213,6 +213,7 @@ class Drawer(object):
     '''
     def draw_3d_nonlinear_regression(self, X1, X2, Y, show_image=True):
         last_scalar = self.rescaled[-1]
+        print(last_scalar)
 
         fig = plt.figure()
         ax = fig.add_subplot(111, projection='3d')
@@ -221,6 +222,7 @@ class Drawer(object):
         x = np.column_stack([X1.ravel(), X2.ravel()])
         ax.plot_surface(X1, X2, self.func(last_scalar, x).reshape(len(X1), len(X2)), cmap=cm.coolwarm)
 
+        ax.text2D(0.05, 0.95, f'3d Nonlinear Regression - {self.method_name}', transform=ax.transAxes)
         ax.set_xlabel('$X$')
         ax.set_ylabel('$Y$')
         ax.set_zlabel('$Z$')

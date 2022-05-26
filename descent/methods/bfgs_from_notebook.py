@@ -123,12 +123,11 @@ class BFGS(object):
         x_old = self.x0
 
         for i in np.arange(1, max_iterations + 1):
-            print('jok')
             # Search direction
             p = -1 * np.dot(H_old, self.grad(x_old))
 
-            # alpha = line_search(self.f, self.grad, x_old, p, maxiter=max_iterations)
-            alpha = 0.0000000000000001
+            alpha = line_search(self.f, self.grad, x_old, p, maxiter=max_iterations)
+            # alpha = 0.0000000000000001
 
             if alpha is None:
                 print('Wolfe line search did not converge')
@@ -180,25 +179,25 @@ class BFGS(object):
 
 
 def main():
-    def r(m_b, m_x):
-        accumulator = 0
-        for i in range(len(m_b)):
-            accumulator += m_b[i] * m_x ** i
-        return accumulator
-
     # def r(m_b, m_x):
-    #     return m_b[0] * m_x / (m_b[1] + m_x)
+    #     accumulator = 0
+    #     for i in range(len(m_b)):
+    #         accumulator += m_b[i] * m_x ** i
+    #     return accumulator
+
+    def r(m_b, m_x):
+        return m_b[0] * m_x / (m_b[1] + m_x)
 
     np.set_printoptions(formatter={'float': '{: 0.3f}'.format})
 
-    data = DatasetReader('planar').parse()
-    xs, ys = np.array(data.input)[:, 0], np.array(data.output)
-    result = BFGS(np.ones(10), xs, ys, r).evaluate()
-    print(result)
+    # data = DatasetReader('planar').parse()
+    # xs, ys = np.array(data.input)[:, 0], np.array(data.output)
+    # result = BFGS(np.ones(10), xs, ys, r).evaluate()
+    # print(result)
 
-    # xs = np.linspace(1, 5, 50)
-    # ys = r_func([2, 3], xs) + np.random.normal(0, 1, size=50)
-    # result = BFGS([10, 10], xs, ys).evaluate()
+    xs = np.linspace(1, 5, 50)
+    ys = r([2, 3], xs) + np.random.normal(0, 1, size=50)
+    result = BFGS([10, 10], xs, ys, r).evaluate()
 
     # drawer = Drawer(result)
     # drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)

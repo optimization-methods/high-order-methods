@@ -197,7 +197,7 @@ class DoglegDescentMethod(DescentMethod):
 
             point = point + direction if rhok > self.eta else point
 
-            points.append(point)
+            points.append(point.tolist())
             if ln.norm(g) < self.tol:
                 break
 

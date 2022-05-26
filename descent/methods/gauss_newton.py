@@ -125,7 +125,7 @@ class GaussNewtonDescentMethod(DescentMethod):
             jacobian = self.get_jacobian(old, self.xs)
             dy = self.ys - self.func(old, self.xs)
             new = old + np.linalg.inv(jacobian.T @ jacobian) @ jacobian.T @ dy
-            points.append(new)
+            points.append(new.tolist())
 
             if np.linalg.norm(old - new) < self.tolerance:
                 break

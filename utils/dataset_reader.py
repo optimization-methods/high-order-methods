@@ -9,12 +9,12 @@ class DatasetReader(object):
 
     def parse(self):
         _input = []
-        with open(f'..\\datasets\\{self.file_name}\\input.csv', newline='') as file:
+        with open(f'..\\..\\datasets\\{self.file_name}\\input.csv', newline='') as file:
             for row in csv.reader(file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC):
                 _input.append(row)
 
         _output = []
-        with open(f'..\\datasets\\{self.file_name}\\output.csv', newline='') as file:
+        with open(f'..\\..\\datasets\\{self.file_name}\\output.csv', newline='') as file:
             for row in csv.reader(file, delimiter=',', quoting=csv.QUOTE_NONNUMERIC):
                 if len(row) != 1:
                     raise ValueError('Row length must be 1')
