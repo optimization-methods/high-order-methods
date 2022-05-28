@@ -120,7 +120,7 @@ class DoglegDescentMethod(DescentMethod):
                  max_trust_radius=100.0,
                  eta=0.15,
                  epoch=30):
-        self.func = func
+        self.r = func
         self.start = start
         self.xs = np.array(xs, dtype=config.dtype)
         self.ys = np.array(ys, dtype=config.dtype)
@@ -137,7 +137,7 @@ class DoglegDescentMethod(DescentMethod):
         for i in range(len(b)):
             t = np.zeros(len(b)).astype(float)
             t[i] = t[i] + eps
-            grad = (self.func(b + t, x) - self.func(b - t, x)) / (2 * eps)
+            grad = (self.r(b + t, x) - self.r(b - t, x)) / (2 * eps)
             grads.append(grad)
         return np.column_stack(grads)
 
@@ -162,6 +162,12 @@ class DoglegDescentMethod(DescentMethod):
 
         return A + tau * V
 
+    def f(self, b):
+        return np.sum(self.dy(b) ** 2)
+
+    def dy(self, b):
+        return self.ys - self.r(b, self.xs)
+
     def converge(self):
         points = []
 
@@ -170,14 +176,14 @@ class DoglegDescentMethod(DescentMethod):
 
         trust_radius = self.initial_trust_radius
         for i in range(self.epoch):
-            dy = self.ys - self.func(point, self.xs)
+            dy = self.dy(point)
             jacobian = self.jacobian(point, self.xs)
             g = -2 * jacobian.T @ dy
             hessian = 2 * jacobian.T @ jacobian
 
             direction = self.dogleg_method(g, hessian, trust_radius)
 
-            new_dy = self.ys - self.func(point + direction, self.xs)
+            new_dy = self.dy(point + direction)
 
             act_red = np.sum(dy ** 2) - np.sum(new_dy ** 2)
             pred_red = -(np.dot(g, direction) + 0.5 * np.dot(direction, np.dot(hessian, direction)))
@@ -201,4 +207,4 @@ class DoglegDescentMethod(DescentMethod):
             if ln.norm(g) < self.tol:
                 break
 
-        return DescentResult(points, points, self.func, method_name='Dogleg')
+        return DescentResult(self.f, points, points, r=self.r, method_name='Dogleg')

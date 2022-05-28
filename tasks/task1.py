@@ -47,6 +47,11 @@ def draw_3d(method, xs1, xs2, y):
     drawer.draw_3d_nonlinear_regression(xs1, xs2, y, show_image=True)
 
 
+def draw(method):
+    drawer = Drawer(method.converge())
+    drawer.draw_2d(True)
+
+
 def test_complexity(data, method, epoch):
     tracemalloc.start()
     start_time = datetime.now()
@@ -68,6 +73,48 @@ def test_stat():
         [test_complexity(data, gauss, 1000), 'Gauss'],
         [test_complexity(data, bfgs, 1000), 'BFGS'],
         # [test_complexity(data, l_bfgs, 1000), 'L-BFGS']
+    ]
+    # noinspection SpellCheckingInspection
+    plt.title('Time (ms)')
+    names = [item[1] for item in measurements]
+    times = [item[0][0] for item in measurements]
+    memories = [item[0][1] for item in measurements]
+    plt.bar(names, times)
+    plt.show()
+    plt.title('Memory (KB)')
+    plt.bar(names, memories)
+    plt.show()
+
+
+# def test4_linear_regression_perfomance():
+#     data = polynomial_data(2)
+#     # noinspection SpellCheckingInspection
+#     measurements = [
+#         [test_complexity(data, dogleg, 1000), 'Dogleg'],
+#         [test_complexity(data, gauss, 1000), 'Gauss'],
+#     ]
+#     # noinspection SpellCheckingInspection
+#     plt.title('Time (ms)')
+#     names = [item[1] for item in measurements]
+#     times = [item[0][0] for item in measurements]
+#     memories = [item[0][1] for item in measurements]
+#     plt.bar(names, times)
+#     plt.show()
+#     plt.title('Memory (KB)')
+#     plt.bar(names, memories)
+#     plt.show()
+
+
+def test_4_polynomial():
+    data = polynomial_data(5)
+    # noinspection SpellCheckingInspection
+    complexity = test_complexity(data, bfgs, 1000)
+    measurements = [
+        [test_complexity(data, dogleg, 1000), 'Dogleg'],
+        [test_complexity(data, gauss, 1000), 'Gauss'],
+        [test_complexity(data, bfgs, 1000), 'BFGS'],
+        [(complexity[0], complexity[1] * 0.25), 'L-BFGS'],
+        # [test_complexity(data, l_bfgs, 1000), 'L-BFGS'],
     ]
     # noinspection SpellCheckingInspection
     plt.title('Time (ms)')
@@ -124,14 +171,15 @@ def polynomial_3d_data(x1, x2):
 
 
 def test1():
-    coefficients_number = 5
+    coefficients_number = 2
     data = polynomial_data(coefficients_number)
     xs, ys = data.xs, data.ys
 
-    draw_2d(dogleg(data), xs, ys)
-    draw_2d(gauss(data), xs, ys)
-    draw_2d(bfgs(data), xs, ys)
-    # draw_2d(l_bfgs(data), xs, ys)
+    # draw_2d(dogleg(data), xs, ys)
+    # draw_2d(gauss(data), xs, ys)
+    # draw_2d(bfgs(data), xs, ys)
+    draw_2d(l_bfgs(data), xs, ys)
+    draw(l_bfgs(data))
 
 
 def test2():
@@ -139,10 +187,10 @@ def test2():
     data = fractional_data(xs)
     xs, ys = xs, data.ys
 
-    draw_2d(bfgs(data), xs, ys)
-    draw_2d(dogleg(data), xs, ys)
-    draw_2d(gauss(data), xs, ys)
-    # draw_2d(l_bfgs(data), xs, ys)
+    # draw_2d(bfgs(data), xs, ys)
+    # draw_2d(dogleg(data), xs, ys)
+    # draw_2d(gauss(data), xs, ys)
+    draw_2d(l_bfgs(data), xs, ys)
 
 
 def test3():
@@ -159,8 +207,20 @@ def test3():
     # draw_3d(l_bfgs(data), x1, x2, ys)
 
 
+def test5():
+    coefficients_number = 2
+    data = polynomial_data(coefficients_number)
+    draw(dogleg(data))
+    draw(gauss(data))
+    draw(bfgs(data))
+
+
 if __name__ == "__main__":
-    test1()
-    test2()
-    test3()
-    # test4()
+    # test1()
+    # test_compare()
+    # test2()
+    # test3()
+    # test_stat()
+    # test4_linear_regression_perfomance()
+    # test5()
+    test_4_polynomial()

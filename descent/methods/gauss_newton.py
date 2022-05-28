@@ -98,7 +98,7 @@ class GaussNewtonDescentMethod(DescentMethod):
     def __init__(self, func, start, xs, ys,
                  epoch=30,
                  tolerance=1e-5):
-        self.func = func
+        self.r = func
         self.start = start
         self.xs = np.array(xs, config.dtype)
         self.ys = np.array(ys, config.dtype)
@@ -106,13 +106,19 @@ class GaussNewtonDescentMethod(DescentMethod):
         self.epoch = epoch
         self.tolerance = tolerance
 
+    def f(self, b):
+        return np.sum(self.dy(b) ** 2)
+
+    def dy(self, b):
+        return self.ys - self.r(b, self.xs)
+
     def get_jacobian(self, b, x):
         eps = 1e-6
         grads = []
         for i in range(len(b)):
             t = np.zeros(len(b)).astype(float)
             t[i] = t[i] + eps
-            grad = (self.func(b + t, x) - self.func(b - t, x)) / (2 * eps)
+            grad = (self.r(b + t, x) - self.r(b - t, x)) / (2 * eps)
             grads.append(grad)
         return np.column_stack(grads)
 
@@ -123,11 +129,11 @@ class GaussNewtonDescentMethod(DescentMethod):
         for itr in range(self.epoch):
             old = new
             jacobian = self.get_jacobian(old, self.xs)
-            dy = self.ys - self.func(old, self.xs)
+            dy = self.dy(old)
             new = old + np.linalg.inv(jacobian.T @ jacobian) @ jacobian.T @ dy
             points.append(new.tolist())
 
             if np.linalg.norm(old - new) < self.tolerance:
                 break
 
-        return DescentResult(points, points, self.func, method_name='Gauss_Newton')
+        return DescentResult(self.f, points, points, r=self.r, method_name='Gauss_Newton')

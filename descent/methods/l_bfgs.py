@@ -179,7 +179,7 @@ class LBfgsDescentMethod(DescentMethod):
             k += 1
             print(k)
 
-        return DescentResult(np.array(points), np.array(points), self.r, 'L_BFGS')
+        return DescentResult(self.f, np.array(points), np.array(points), r=self.r, method_name='L_BFGS')
 
     def wolfe(self, x_k, p_k):
         x_k = np.array(x_k, dtype=config.dtype)

@@ -150,7 +150,7 @@ class BfgsDescentMethod(object):
 
             points.append(x0.tolist())
 
-        return DescentResult(points, points, self.r, 'BFGS')
+        return DescentResult(self.f, points, points, r=self.r, method_name='BFGS')
 
 
 def main():

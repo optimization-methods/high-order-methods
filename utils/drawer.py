@@ -40,6 +40,8 @@ class Drawer(object):
         self.rescaled = np.array(sgd_result.rescaled_scalars, dtype=config.dtype)
         self.func = sgd_result.func
 
+        self.r = sgd_result.r
+
         self.batch_size = sgd_result.batch_size
 
         self.scaler_name = sgd_result.scaler_name
@@ -131,7 +133,8 @@ class Drawer(object):
 
         x, y, z = self.__calculate_values(amount=1000, additional_shift=5)
 
-        plt.contour(x, y, z, sorted([self.func(p) for p in self.scaled]))
+        levels = sorted(list(set([self.func(p) for p in self.scaled])))
+        plt.contour(x, y, z, levels=levels)
         plt.plot(self.scaled[:, 0], self.scaled[:, 1],
                  marker=self.line_config.marker,
                  linestyle=self.line_config.linestyle,
@@ -140,7 +143,7 @@ class Drawer(object):
         plt.text(*self.scaled[0], self.__point_text(self.scaled[0]))
         plt.text(*self.scaled[-1], self.__point_text(self.scaled[-1]))
 
-        plt.title('2d-projection')
+        plt.title(f'2d-projection - {self.method_name}')
         plt.xlabel('X axis')
         plt.ylabel('Y axis')
 
@@ -198,8 +201,8 @@ class Drawer(object):
         plt.scatter(xs, ys, color='green')
         X = np.linspace(np.amin(xs) - shift, np.amax(xs) + shift, 1000)
         # predicted height function
-        plt.plot(X, self.func(first_scalar, X), c='blue')
-        plt.plot(X, self.func(last_scalar, X), c='red')
+        plt.plot(X, self.r(first_scalar, X), c='blue')
+        plt.plot(X, self.r(last_scalar, X), c='red')
 
         plt.title(f'2d_Nonlinear Regression - {self.method_name}')
         plt.xlabel('X axis')
@@ -220,7 +223,7 @@ class Drawer(object):
 
         ax.scatter(X1, X2, Y, c='green')
         x = np.column_stack([X1.ravel(), X2.ravel()])
-        ax.plot_surface(X1, X2, self.func(last_scalar, x).reshape(len(X1), len(X2)), cmap=cm.coolwarm)
+        ax.plot_surface(X1, X2, self.r(last_scalar, x).reshape(len(X1), len(X2)), cmap=cm.coolwarm)
 
         ax.text2D(0.05, 0.95, f'3d Nonlinear Regression - {self.method_name}', transform=ax.transAxes)
         ax.set_xlabel('$X$')
