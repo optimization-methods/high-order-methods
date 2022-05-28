@@ -4,6 +4,7 @@ from datetime import datetime
 
 import numpy as np
 from matplotlib import pyplot as plt
+import matplotlib as mpl
 
 from descent.methods.bfgs import BfgsDescentMethod
 from descent.methods.dogleg import DoglegDescentMethod
@@ -12,6 +13,9 @@ from descent.methods.l_bfgs import LBfgsDescentMethod
 from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
+
+
+# mpl.use("TkAgg")
 
 
 def dogleg(task):
@@ -56,14 +60,14 @@ def test_complexity(data, method, epoch):
     return (end_time - start_time).total_seconds() * 1000 / epoch, peak / 1024
 
 
-def test4():
+def test_stat():
     data = fractional_data(np.linspace(1, 5, 50))
     # noinspection SpellCheckingInspection
     measurements = [
         [test_complexity(data, dogleg, 1000), 'Dogleg'],
         [test_complexity(data, gauss, 1000), 'Gauss'],
         [test_complexity(data, bfgs, 1000), 'BFGS'],
-        [test_complexity(data, l_bfgs, 1000), 'L-BFGS']
+        # [test_complexity(data, l_bfgs, 1000), 'L-BFGS']
     ]
     # noinspection SpellCheckingInspection
     plt.title('Time (ms)')

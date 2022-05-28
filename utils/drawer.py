@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt, cm
 # from utils.config import dtype
 import utils.config as config
 
-save_directory = "../images"
+save_directory = f"{config.source}/images"
 
 
 class SurfaceConfig(object):
