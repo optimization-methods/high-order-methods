@@ -7,4 +7,12 @@ class DescentMethod:
 
     @property
     def name(self):
-        raise NotImplementedError("Specify the name")
+        raise NotImplementedError("You need to inherit this class")
+
+    @property
+    def xs(self):
+        raise NotImplementedError("You need to inherit this class")
+
+    @property
+    def ys(self):
+        raise NotImplementedError("You need to inherit this class")

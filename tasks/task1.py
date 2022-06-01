@@ -37,51 +37,6 @@ def draw_2d_converge_projection(method):
     drawer = Drawer(result)
     drawer.draw_2d(True)
 
-
-def test_complexity(method, epoch):
-    tracemalloc.start()
-    start_time = datetime.now()
-
-    for i in range(epoch):
-        method.converge()
-
-    end_time = datetime.now()
-    _, peak = tracemalloc.get_traced_memory()
-    tracemalloc.stop()
-    return (end_time - start_time).total_seconds() * 1000 / epoch, peak / 1024
-
-
-def polynomial_data(coefficients_number):
-    def f(m_b, m_x):
-        m_x = np.array(m_x, dtype=config.dtype)
-        accumulator = 0
-        for i in range(len(m_b)):
-            accumulator += m_b[i] * m_x ** i
-        return accumulator
-
-    data = DatasetReader('planar').parse()
-    xs = np.array(data.input)[:, 0]
-    ys = data.output
-    start = np.ones(coefficients_number)
-    return Task(f, xs, ys, start)
-
-def fractional_data(xs):
-    def f(m_b, m_x):
-        return m_b[0] * m_x / (m_b[1] + m_x)
-
-    ys = f([2, 3], xs) + np.random.normal(0, 0.1, size=len(xs))
-    start = [5, 5]
-    return Task(f, xs, ys, start)
-
-def polynomial_3d_data(x1, x2):
-    def f(m_b, m_x):
-        return m_b[0] - (1 / m_b[1]) * m_x[:, 0] ** 2 - (1 / m_b[2]) * m_x[:, 1] ** 2
-
-    xs = np.column_stack([x1.ravel(), x2.ravel()])
-    ys = f([4, 3, 2], xs) + np.random.normal(0, 1, size=len(xs))
-    start = [1, 1, 1]
-    return Task(f, xs, ys, start)
-
 def test_time(data: Task):
     def measure_time(method, epoch=1000):
         start_time = datetime.now()
@@ -111,61 +66,6 @@ def test_memory(data: Task):
     plt.bar([item[0] for item in measurements], [item[1] for item in measurements])
     plt.show()
 
-    # noinspection SpellCheckingInspection
-    times = [item[0] for item in measurements]
-    memos = [item[1] for item in measurements]
-    names = [item[3] for item in measurements]
-
-    plt.title('Time (ms)')
-    plt.bar(names, times)
-    plt.show()
-    plt.title('Memory (KB)')
-    plt.bar(names, memos)
-    plt.show()
-
-
-def test4_linear_regression_perfomance():
-    data = polynomial_data(2)
-    # noinspection SpellCheckingInspection
-    measurements = [
-        [test_complexity(data, methods.dogleg, 1000), 'Dogleg'],
-        [test_complexity(data, methods.gauss, 1000), 'Gauss'],
-    ]
-    # noinspection SpellCheckingInspection
-    plt.title('Time (ms)')
-    names = [item[1] for item in measurements]
-    times = [item[0][0] for item in measurements]
-    memories = [item[0][1] for item in measurements]
-    plt.bar(names, times)
-    plt.show()
-    plt.title('Memory (KB)')
-    plt.bar(names, memories)
-    plt.show()
-
-
-def test_4_polynomial():
-    data = polynomial_data(5)
-    # noinspection SpellCheckingInspection
-    complexity = test_complexity(methods.bfgs(data), 1000)
-    measurements = [
-        [test_complexity(methods.dogleg(data), 1000), methods.dogleg(data).name],
-        [test_complexity(methods.gauss(data), 1000), methods.gauss(data).name],
-        [test_complexity(methods.bfgs(data), 1000), methods.bfgs(data).name],
-        [(complexity[0], complexity[1] * 0.25), methods.l_bfgs(data).name],
-        # [test_complexity(data, l_bfgs, 1000), 'L-BFGS'],
-    ]
-    # noinspection SpellCheckingInspection
-    plt.title('Time (ms)')
-    names = [item[1] for item in measurements]
-    times = [item[0][0] for item in measurements]
-    memories = [item[0][1] for item in measurements]
-    plt.bar(names, times)
-    plt.show()
-    plt.title('Memory (KB)')
-    plt.bar(names, memories)
-    plt.show()
-
-
 def test_2d_linear_regression():
     data = polynomial_data(2)
     xs, ys = data.xs, data.ys
@@ -183,11 +83,8 @@ def test_2d_fractional_approximation():
         draw_2d_nonlinear_regression(method, xs, ys)
 
 def test_2d_polynomial_approximation():
-    data = polynomial_data(5)
-    xs, ys = data.xs, data.ys
-
-    for method in methods.each(data):
-        draw_2d_nonlinear_regression(method, xs, ys)
+    for method in methods.each(polynomial_data(5)):
+        draw_2d_nonlinear_regression(method, method.xs, method.ys)
 
 
 def test_3d_polynomial_approximation():
@@ -203,7 +100,6 @@ def test_3d_polynomial_approximation():
 
 
 if __name__ == "__main__":
-    # fixme урод давай без цифр, просто пиши словами
     test_linear_regression()
     test_non_linear_regression()
     test_non_linear_regression_perfomance()
