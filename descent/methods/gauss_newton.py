@@ -137,3 +137,6 @@ class GaussNewtonDescentMethod(DescentMethod):
                 break
 
         return DescentResult(self.f, points, points, r=self.r, method_name='Gauss_Newton')
+
+    def name(self):
+        return 'Gauss-Newton'

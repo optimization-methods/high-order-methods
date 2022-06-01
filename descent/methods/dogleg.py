@@ -208,3 +208,7 @@ class DoglegDescentMethod(DescentMethod):
                 break
 
         return DescentResult(self.f, points, points, r=self.r, method_name='Dogleg')
+
+    @property
+    def name(self):
+        return 'Dogleg'

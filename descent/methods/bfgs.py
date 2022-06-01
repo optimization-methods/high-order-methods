@@ -1,20 +1,20 @@
-
 import numpy as np
 import numpy.linalg as ln
 
+from descent.methods.descent_method import DescentMethod
 from descent.methods.descent_result import DescentResult
 from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
 
 
-# noinspection PyPep8Naming
-class BfgsDescentMethod(object):
-    class LineSearch(object):
-        # noinspection SpellCheckingInspection
+# noinspection SpellCheckingInspection
+class BfgsDescentMethod(DescentMethod):
+    class LineSearch:
         def __init__(self, point, d, bfgs):
             self.point = point
             self.d = d
+            # noinspection SpellCheckingInspection
             self.bfgs = bfgs
 
         def g(self, alpha):
@@ -42,7 +42,7 @@ class BfgsDescentMethod(object):
                 k += 1
             return alpha
 
-        def wolfe(self, maxiter=100, c1=10**(-3), c2=0.9, alpha_1=1.0, alpha_max=10**6):
+        def wolfe(self, maxiter=100, c1=10 ** (-3), c2=0.9, alpha_1=1.0, alpha_max=10 ** 6):
             if alpha_1 >= alpha_max:
                 raise ValueError('Argument alpha_1 should be less than alpha_max')
 
@@ -53,7 +53,8 @@ class BfgsDescentMethod(object):
 
             for i in np.arange(1, maxiter + 1):
                 g_alpha = self.g(alpha_new)
-                if (i == 1 and g_alpha > self.g(0) + c1 * alpha_new * self.spec_grad(0)) or (i > 1 and g_alpha >= self.g(alpha_old)):
+                if (i == 1 and g_alpha > self.g(0) + c1 * alpha_new * self.spec_grad(0)) or (
+                        i > 1 and g_alpha >= self.g(alpha_old)):
                     final_alpha = self.zoom(alpha_old, alpha_new, c1, c2)
                     break
 
@@ -151,6 +152,10 @@ class BfgsDescentMethod(object):
             points.append(x0.tolist())
 
         return DescentResult(self.f, points, points, r=self.r, method_name='BFGS')
+
+    @property
+    def name(self):
+        return 'BFGS'
 
 
 def main():

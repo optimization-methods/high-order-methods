@@ -204,6 +204,10 @@ class LBfgsDescentMethod(DescentMethod):
             k += 1
         return alpha
 
+    @property
+    def name(self):
+        return 'L-BFGS'
+
 
 if __name__ == "__main__":
     # def r(m_b, m_x):
