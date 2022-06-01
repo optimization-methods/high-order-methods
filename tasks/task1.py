@@ -1,15 +1,11 @@
 import tracemalloc
-from dataclasses import dataclass
 from datetime import datetime
 
 import numpy as np
 from matplotlib import pyplot as plt
-import matplotlib as mpl
 
-from descent.methods.bfgs import BfgsDescentMethod
-from descent.methods.dogleg import DoglegDescentMethod
-from descent.methods.gauss_newton import GaussNewtonDescentMethod
-from descent.methods.l_bfgs import LBfgsDescentMethod
+from tasks.templates import methods
+from tasks.templates.task import Task
 from utils import config
 from utils.dataset_reader import DatasetReader
 from utils.drawer import Drawer
@@ -18,23 +14,7 @@ from utils.drawer import Drawer
 # mpl.use("TkAgg")
 
 
-def dogleg(task):
-    return DoglegDescentMethod(task.f, start=task.start, xs=task.xs, ys=task.ys)
-
-
-def gauss(task):
-    return GaussNewtonDescentMethod(task.f, start=task.start, xs=task.xs, ys=task.ys)
-
-
-def bfgs(task):
-    return BfgsDescentMethod(task.f, start=task.start, xs=task.xs, ys=task.ys)
-
-
-def l_bfgs(task):
-    return LBfgsDescentMethod(task.f, start=task.start, xs=task.xs, ys=task.ys)
-
-
-def draw_2d(method, xs, ys):
+def draw_2d_nonlinear_regression(m_method, xs, ys):
     print('testing...')
     result = method.converge()
     print(f'{result.method_name} {result.rescaled_scalars[-1]}')
@@ -52,12 +32,12 @@ def draw(method):
     drawer.draw_2d(True)
 
 
-def test_complexity(data, method, epoch):
+def test_complexity(method, epoch):
     tracemalloc.start()
     start_time = datetime.now()
 
     for i in range(epoch):
-        result = method(data)
+        method.converge()
 
     end_time = datetime.now()
     _, peak = tracemalloc.get_traced_memory()
@@ -65,25 +45,19 @@ def test_complexity(data, method, epoch):
     return (end_time - start_time).total_seconds() * 1000 / epoch, peak / 1024
 
 
-def test_stat():
-    data = fractional_data(np.linspace(1, 5, 50))
-    # noinspection SpellCheckingInspection
-    measurements = [
-        [test_complexity(data, dogleg, 1000), 'Dogleg'],
-        [test_complexity(data, gauss, 1000), 'Gauss'],
-        [test_complexity(data, bfgs, 1000), 'BFGS'],
-        # [test_complexity(data, l_bfgs, 1000), 'L-BFGS']
-    ]
-    # noinspection SpellCheckingInspection
-    plt.title('Time (ms)')
-    names = [item[1] for item in measurements]
-    times = [item[0][0] for item in measurements]
-    memories = [item[0][1] for item in measurements]
-    plt.bar(names, times)
-    plt.show()
-    plt.title('Memory (KB)')
-    plt.bar(names, memories)
-    plt.show()
+def polynomial_data(coefficients_number):
+    def f(m_b, m_x):
+        m_x = np.array(m_x, dtype=config.dtype)
+        accumulator = 0
+        for i in range(len(m_b)):
+            accumulator += m_b[i] * m_x ** i
+        return accumulator
+
+    data = DatasetReader('planar').parse()
+    xs = np.array(data.input)[:, 0]
+    ys = data.output
+    start = np.ones(coefficients_number)
+    return Task(f, xs, ys, start)
 
 
 # def test4_linear_regression_perfomance():
@@ -104,51 +78,43 @@ def test_stat():
 #     plt.bar(names, memories)
 #     plt.show()
 
-
-def test_4_polynomial():
-    data = polynomial_data(5)
-    # noinspection SpellCheckingInspection
-    complexity = test_complexity(data, bfgs, 1000)
-    measurements = [
-        [test_complexity(data, dogleg, 1000), 'Dogleg'],
-        [test_complexity(data, gauss, 1000), 'Gauss'],
-        [test_complexity(data, bfgs, 1000), 'BFGS'],
-        [(complexity[0], complexity[1] * 0.25), 'L-BFGS'],
-        # [test_complexity(data, l_bfgs, 1000), 'L-BFGS'],
-    ]
-    # noinspection SpellCheckingInspection
-    plt.title('Time (ms)')
-    names = [item[1] for item in measurements]
-    times = [item[0][0] for item in measurements]
-    memories = [item[0][1] for item in measurements]
-    plt.bar(names, times)
-    plt.show()
-    plt.title('Memory (KB)')
-    plt.bar(names, memories)
-    plt.show()
-
-
-@dataclass
-class Task:
-    f: object
-    xs: object
-    ys: object
-    start: object
-
-
-def polynomial_data(coefficients_number):
+def polynomial_3d_data(x1, x2):
     def f(m_b, m_x):
-        m_x = np.array(m_x, dtype=config.dtype)
-        accumulator = 0
-        for i in range(len(m_b)):
-            accumulator += m_b[i] * m_x ** i
-        return accumulator
+        return m_b[0] - (1 / m_b[1]) * m_x[:, 0] ** 2 - (1 / m_b[2]) * m_x[:, 1] ** 2
 
-    data = DatasetReader('planar').parse()
-    xs = np.array(data.input)[:, 0]
-    ys = data.output
-    start = np.ones(coefficients_number)
+    xs = np.column_stack([x1.ravel(), x2.ravel()])
+    ys = f([4, 3, 2], xs) + np.random.normal(0, 1, size=len(xs))
+    start = [1, 1, 1]
     return Task(f, xs, ys, start)
+
+def test_time(data: Task):
+    def measure_time(method, epoch=1000):
+        start_time = datetime.now()
+        for i in range(epoch):
+            method.converge()
+        end_time = datetime.now()
+        return (end_time - start_time).total_seconds()
+
+    measurements = [(method.name, measure_time(method)) for method in methods.each(data)]
+
+    plt.title('Time (s)')
+    plt.bar([item[0] for item in measurements], [item[1] for item in measurements])
+    plt.show()
+
+def test_memory(data: Task):
+    def measure_memory(method, epoch=1000):
+        tracemalloc.start()
+        for i in range(epoch):
+            method.converge()
+        _, peak = tracemalloc.get_traced_memory()
+        tracemalloc.stop()
+        return peak / 1024
+
+    measurements = [(method.name, measure_memory(method)) for method in methods.each(data)]
+
+    plt.title('Memory (KB)')
+    plt.bar([item[0] for item in measurements], [item[1] for item in measurements])
+    plt.show()
 
 
 def fractional_data(xs):
@@ -201,21 +167,15 @@ def test3():
     data = polynomial_3d_data(x1, x2)
     xs, ys = data.xs, data.ys
 
-    draw_3d(dogleg(data), x1, x2, ys)
-    draw_3d(gauss(data), x1, x2, ys)
-    draw_3d(bfgs(data), x1, x2, ys)
-    # draw_3d(l_bfgs(data), x1, x2, ys)
-
-
-def test5():
-    coefficients_number = 2
-    data = polynomial_data(coefficients_number)
-    draw(dogleg(data))
-    draw(gauss(data))
-    draw(bfgs(data))
+    for method in methods.each(data):
+        draw_3d_nonlinear_regression(method, x1, x2, ys)
 
 
 if __name__ == "__main__":
+    # fixme урод давай без цифр, просто пиши словами
+    test_linear_regression()
+    test_non_linear_regression()
+    test_non_linear_regression_perfomance()
     # test1()
     # test_compare()
     # test2()
@@ -223,4 +183,4 @@ if __name__ == "__main__":
     # test_stat()
     # test4_linear_regression_perfomance()
     # test5()
-    test_4_polynomial()
+    # test_4_polynomial()
