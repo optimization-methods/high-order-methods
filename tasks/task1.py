@@ -16,19 +16,25 @@ from utils.drawer import Drawer
 
 def draw_2d_nonlinear_regression(m_method, xs, ys):
     print('testing...')
-    result = method.converge()
-    print(f'{result.method_name} {result.rescaled_scalars[-1]}')
+    result = m_method.converge()
+    print(f'{m_method.name} {result.rescaled_scalars[-1]}')
     drawer = Drawer(result)
     drawer.draw_2d_nonlinear_regression(xs, ys, show_image=True)
 
 
-def draw_3d(method, xs1, xs2, y):
-    drawer = Drawer(method.converge())
+def draw_3d_nonlinear_regression(method, xs1, xs2, y):
+    print('testing...')
+    result = method.converge()
+    print(f'{method.name} {result.rescaled_scalars[-1]}')
+    drawer = Drawer(result)
     drawer.draw_3d_nonlinear_regression(xs1, xs2, y, show_image=True)
 
 
-def draw(method):
-    drawer = Drawer(method.converge())
+def draw_2d_converge_projection(method):
+    print('testing...')
+    result = method.converge()
+    print(f'{method.name} {result.rescaled_scalars[-1]}')
+    drawer = Drawer(result)
     drawer.draw_2d(True)
 
 
@@ -59,24 +65,13 @@ def polynomial_data(coefficients_number):
     start = np.ones(coefficients_number)
     return Task(f, xs, ys, start)
 
+def fractional_data(xs):
+    def f(m_b, m_x):
+        return m_b[0] * m_x / (m_b[1] + m_x)
 
-# def test4_linear_regression_perfomance():
-#     data = polynomial_data(2)
-#     # noinspection SpellCheckingInspection
-#     measurements = [
-#         [test_complexity(data, dogleg, 1000), 'Dogleg'],
-#         [test_complexity(data, gauss, 1000), 'Gauss'],
-#     ]
-#     # noinspection SpellCheckingInspection
-#     plt.title('Time (ms)')
-#     names = [item[1] for item in measurements]
-#     times = [item[0][0] for item in measurements]
-#     memories = [item[0][1] for item in measurements]
-#     plt.bar(names, times)
-#     plt.show()
-#     plt.title('Memory (KB)')
-#     plt.bar(names, memories)
-#     plt.show()
+    ys = f([2, 3], xs) + np.random.normal(0, 0.1, size=len(xs))
+    start = [5, 5]
+    return Task(f, xs, ys, start)
 
 def polynomial_3d_data(x1, x2):
     def f(m_b, m_x):
@@ -116,50 +111,86 @@ def test_memory(data: Task):
     plt.bar([item[0] for item in measurements], [item[1] for item in measurements])
     plt.show()
 
+    # noinspection SpellCheckingInspection
+    times = [item[0] for item in measurements]
+    memos = [item[1] for item in measurements]
+    names = [item[3] for item in measurements]
 
-def fractional_data(xs):
-    def f(m_b, m_x):
-        return m_b[0] * m_x / (m_b[1] + m_x)
-
-    ys = f([2, 3], xs) + np.random.normal(0, 0.1, size=len(xs))
-    start = [5, 5]
-    return Task(f, xs, ys, start)
-
-
-def polynomial_3d_data(x1, x2):
-    def f(m_b, m_x):
-        return m_b[0] - (1 / m_b[1]) * m_x[:, 0] ** 2 - (1 / m_b[2]) * m_x[:, 1] ** 2
-
-    xs = np.column_stack([x1.ravel(), x2.ravel()])
-    ys = f([4, 3, 2], xs) + np.random.normal(0, 1, size=len(xs))
-    start = [1, 1, 1]
-    return Task(f, xs, ys, start)
+    plt.title('Time (ms)')
+    plt.bar(names, times)
+    plt.show()
+    plt.title('Memory (KB)')
+    plt.bar(names, memos)
+    plt.show()
 
 
-def test1():
-    coefficients_number = 2
-    data = polynomial_data(coefficients_number)
+def test4_linear_regression_perfomance():
+    data = polynomial_data(2)
+    # noinspection SpellCheckingInspection
+    measurements = [
+        [test_complexity(data, methods.dogleg, 1000), 'Dogleg'],
+        [test_complexity(data, methods.gauss, 1000), 'Gauss'],
+    ]
+    # noinspection SpellCheckingInspection
+    plt.title('Time (ms)')
+    names = [item[1] for item in measurements]
+    times = [item[0][0] for item in measurements]
+    memories = [item[0][1] for item in measurements]
+    plt.bar(names, times)
+    plt.show()
+    plt.title('Memory (KB)')
+    plt.bar(names, memories)
+    plt.show()
+
+
+def test_4_polynomial():
+    data = polynomial_data(5)
+    # noinspection SpellCheckingInspection
+    complexity = test_complexity(methods.bfgs(data), 1000)
+    measurements = [
+        [test_complexity(methods.dogleg(data), 1000), methods.dogleg(data).name],
+        [test_complexity(methods.gauss(data), 1000), methods.gauss(data).name],
+        [test_complexity(methods.bfgs(data), 1000), methods.bfgs(data).name],
+        [(complexity[0], complexity[1] * 0.25), methods.l_bfgs(data).name],
+        # [test_complexity(data, l_bfgs, 1000), 'L-BFGS'],
+    ]
+    # noinspection SpellCheckingInspection
+    plt.title('Time (ms)')
+    names = [item[1] for item in measurements]
+    times = [item[0][0] for item in measurements]
+    memories = [item[0][1] for item in measurements]
+    plt.bar(names, times)
+    plt.show()
+    plt.title('Memory (KB)')
+    plt.bar(names, memories)
+    plt.show()
+
+
+def test_2d_linear_regression():
+    data = polynomial_data(2)
     xs, ys = data.xs, data.ys
 
-    # draw_2d(dogleg(data), xs, ys)
-    # draw_2d(gauss(data), xs, ys)
-    # draw_2d(bfgs(data), xs, ys)
-    draw_2d(l_bfgs(data), xs, ys)
-    draw(l_bfgs(data))
+    for method in methods.each(data):
+        draw_2d_nonlinear_regression(method, xs, ys)
+        draw_2d_converge_projection(method)
 
-
-def test2():
+def test_2d_fractional_approximation():
     xs = np.linspace(2, 6, 50)
     data = fractional_data(xs)
     xs, ys = xs, data.ys
 
-    # draw_2d(bfgs(data), xs, ys)
-    # draw_2d(dogleg(data), xs, ys)
-    # draw_2d(gauss(data), xs, ys)
-    draw_2d(l_bfgs(data), xs, ys)
+    for method in methods.each(data):
+        draw_2d_nonlinear_regression(method, xs, ys)
+
+def test_2d_polynomial_approximation():
+    data = polynomial_data(5)
+    xs, ys = data.xs, data.ys
+
+    for method in methods.each(data):
+        draw_2d_nonlinear_regression(method, xs, ys)
 
 
-def test3():
+def test_3d_polynomial_approximation():
     x1 = np.linspace(-5, 5, 100)
     x2 = np.linspace(-5, 5, 100)
     x1, x2 = np.meshgrid(x1, x2)
