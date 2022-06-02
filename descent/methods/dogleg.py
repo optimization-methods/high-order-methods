@@ -62,7 +62,7 @@ class DoglegDescentMethod(DescentMethod):
 
             direction = self.dogleg_method(g, hessian, trust_radius)
 
-            new_dy = self.dy(point + direction)
+            new_dy = self.calculus.dy(point + direction)
 
             act_red = np.sum(dy ** 2) - np.sum(new_dy ** 2)
             pred_red = -(np.dot(g, direction) + 0.5 * np.dot(direction, np.dot(hessian, direction)))
@@ -84,7 +84,7 @@ class DoglegDescentMethod(DescentMethod):
             if ln.norm(g) < self.tol:
                 break
 
-        return DescentResult(self.f, points, points, r=self.r, method_name='Dogleg')
+        return DescentResult(self.calculus.f, points, points, r=self._r, method_name='Dogleg')
 
     @property
     def name(self):

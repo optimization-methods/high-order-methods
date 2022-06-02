@@ -23,6 +23,7 @@ def fractional_data() -> Data:
     def f(m_b, m_x):
         return m_b[0] * m_x / (m_b[1] + m_x)
 
+    xs = np.linspace(2, 6, 50)
     ys = f([2, 3], xs) + np.random.normal(0, 0.1, size=len(xs))
     start = [5, 5]
     return Data(f, xs, ys, start)

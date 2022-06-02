@@ -6,9 +6,6 @@ from descent.math.line_search import LineSearch
 from descent.methods.descent_method import DescentMethod
 from descent.methods.descent_result import DescentResult
 from utils import config
-from utils.dataset_reader import DatasetReader
-from utils.drawer import Drawer
-
 
 
 class BFGSDescentMethod(DescentMethod):
@@ -20,8 +17,8 @@ class BFGSDescentMethod(DescentMethod):
         self.eps = 10e-3
 
     def gradient(self, x):
-        dy = self.dy(x)
-        jacobian = self.jacobian(x)
+        dy = self.calculus.dy(x)
+        jacobian = self.calculus.jacobian(x)
         return -2 * jacobian.T @ dy
 
     def converge(self):
@@ -49,9 +46,9 @@ class BFGSDescentMethod(DescentMethod):
 
             ro = 1.0 / (np.dot(g_diff, step))
 
-            A1 = I - ro * step[:, np.newaxis] * g_diff[np.newaxis, :]
-            A2 = I - ro * g_diff[:, np.newaxis] * step[np.newaxis, :]
-            H = np.dot(A1, np.dot(H, A2)) + (ro * step[:, np.newaxis] * step[np.newaxis, :])
+            a1 = eye - ro * step[:, np.newaxis] * g_diff[np.newaxis, :]
+            a2 = eye - ro * g_diff[:, np.newaxis] * step[np.newaxis, :]
+            h = np.dot(a1, np.dot(h, a2)) + (ro * step[:, np.newaxis] * step[np.newaxis, :])
 
             points.append(x0.tolist())
 
