@@ -23,3 +23,8 @@ class Calculus:
             grad = (self.__r(b + t, self.__xs) - self.__r(b - t, self.__xs)) / (2 * eps)
             grads.append(grad)
         return np.column_stack(grads)
+
+    def gradient(self, x):
+        dy = self.dy(x)
+        jacobian = self.jacobian(x)
+        return -2 * jacobian.T @ dy

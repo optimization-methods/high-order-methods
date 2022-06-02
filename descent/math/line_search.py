@@ -18,7 +18,7 @@ class LineSearch:
         return np.dot(self.__grad(alpha).T, self.d)
 
     def __data(self, alpha):
-        return self.__g(alpha), self.__grad(alpha).T @ self.d
+        return self.__g(alpha), self.__spec_grad(alpha)
 
     def lowering(self, epoch=20, alpha=1, c1=1e-4, c2=0.9, rho=0.8):
         k = 0
@@ -33,7 +33,7 @@ class LineSearch:
             k += 1
         return alpha
 
-    def find(self, max_iter=100, c1=10 ** (-3), c2=0.9, alpha_1=1.0, alpha_max=10 ** 6):
+    def find(self, max_iter=100, c1=10**(-4), c2=0.9, alpha_1=1.0, alpha_max=10**6):
         if alpha_1 >= alpha_max:
             raise ValueError('Argument alpha_1 should be less than alpha_max')
 

@@ -96,7 +96,7 @@ class Drawer(object):
         ax.contour(x, y, z, levels=levels, **self.contour_config)
 
         self.__set_headers(f'3d-converge - {self.method_name}')
-        self.__complete_plot('3d', show_image)
+        self.__complete_plot('3d_converge', show_image)
 
     def draw_2d(self, show_image=True):
         """
@@ -117,7 +117,7 @@ class Drawer(object):
         plt.text(*self.scaled[-1], self.__point_text(self.scaled[-1]))
 
         self.__set_headers(f'2d-projection - {self.method_name}')
-        self.__complete_plot('./img/2d', show_image)
+        self.__complete_plot('2d_projection', show_image)
 
     def draw_linear_regression(self, x, y, nth, shift=2, show_image=True):
         if len(x[0]) != 1 and len(y[0]) != 1:
@@ -133,10 +133,10 @@ class Drawer(object):
 
         plt.scatter(x, y, **self.scatter_config)
 
+        x = np.linspace(np.amin(x) - shift, np.amax(x) + shift, 1000)
+
         color = iter(cm.coolwarm(np.linspace(0, 1, len(scalars))))
         for index, scalar in enumerate(scalars):
-            c = next(color)
-            x = np.linspace(np.amin(x) - shift, np.amax(x) + shift, 1000)
             y = scalar[0]
             for i in range(1, len(scalar)):
                 y += x * scalar[i]
@@ -187,7 +187,7 @@ class Drawer(object):
         self.__complete_plot('3d_nonlinear_regression', show_image)
 
     def __point_text(self, point):
-        return f'({point[0]:.2f}, {point[1]:.2f}) - {self.func(point):.5f}'
+        return f'({point[0]:.2f}, {point[1]:.2f}) - {self.func(point):.2f}'
 
     @staticmethod
     def __set_headers(title):

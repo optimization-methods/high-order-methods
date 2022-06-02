@@ -16,18 +16,14 @@ class BFGSDescentMethod(DescentMethod):
 
         self.eps = 10e-3
 
-    def gradient(self, x):
-        dy = self.calculus.dy(x)
-        jacobian = self.calculus.jacobian(x)
-        return -2 * jacobian.T @ dy
-
     def converge(self):
-        g = self.gradient(self.start)
+        g = self.calculus.gradient(self.start)
+        points = [self.start]
+
         eye = np.eye(len(self.start), dtype=config.dtype)
         h = eye.copy()
-        points = [self.start]
-        x0 = points[-1]
 
+        x0 = points[-1]
         while ln.norm(g) > self.eps:
             direction = -np.dot(h, g)
 
@@ -41,7 +37,7 @@ class BFGSDescentMethod(DescentMethod):
             step = x1 - x0
             x0 = x1
 
-            new_g = self.gradient(x1)
+            new_g = self.calculus.gradient(x1)
             g_diff = new_g - g
             g = new_g
 
