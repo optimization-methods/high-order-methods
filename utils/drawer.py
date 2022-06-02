@@ -46,12 +46,28 @@ class Drawer(object):
         self.scaler_name = sgd_result.scaler_name
         self.method_name = sgd_result.method_name
 
-        self.surface_config = SurfaceConfig(alpha=0.2, color='green')
-        self.line_config = LineConfig(
-            lambda lightness: cm.hot(lightness),
-            alpha=1, marker='o', markersize=3, linestyle='solid', linewidth=2
-        )
-        self.contour_config = ContourConfig(cmap='autumn', alpha=0.8, linestyles='dashed', linewidths=0.5)
+        self.scatter_config = {
+            'color': 'green',
+            'alpha': 0.3
+        }
+        self.surface_config = {
+            'alpha': 0.2,
+            'color': 'green',
+            'cmap': cm.coolwarm,
+        }
+        self.line_config = {
+            'alpha': 1,
+            'marker': 'o',
+            'markersize': 3,
+            'linestyle': 'solid',
+            'linewidth': 2,
+        }
+        self.contour_config = {
+            'cmap': 'autumn',
+            'alpha': 0.8,
+            'linestyles': 'dashed',
+            'linewidths': 0.5,
+        }
 
     def __calculate_values(self, amount, additional_shift):
         last_point = self.scaled[-1]
@@ -94,7 +110,7 @@ class Drawer(object):
                         color=self.surface_config.color,
                         alpha=self.surface_config.alpha)
 
-        colors = iter(self.line_config.cmap(np.flip(np.linspace(0, 1, len(self.scaled)))))
+        colors = iter(cm.hot(np.flip(np.linspace(0, 1, len(self.scaled)))))
         for i in range(1, len(self.scaled)):
             color = next(colors)
             ax.plot([self.scaled[i - 1][0], self.scaled[i][0]],
@@ -153,7 +169,7 @@ class Drawer(object):
             raise ValueError("Incorrect data provided")
 
         if len(self.rescaled[0]) != 2:
-            raise ValueError("Two parameters must be optmized:\n"
+            raise ValueError("Two parameters must be optimized:\n"
                              "Line intercept and slope\n")
 
         scalars = self.rescaled[0::nth]
@@ -190,6 +206,10 @@ class Drawer(object):
     Possible many parameters.
     '''
     def draw_2d_nonlinear_regression(self, xs, ys, shift=1, show_image=True):
+        """
+        Requires only the predicted height function.
+        Possible many parameters.
+        """
         first_scalar = self.rescaled[0]
         last_scalar = self.rescaled[-1]
 

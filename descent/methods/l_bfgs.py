@@ -1,6 +1,7 @@
 # noinspection SpellCheckingInspection
 import numpy as np
 
+from descent.math.line_search import LineSearch
 from descent.methods.descent_method import DescentMethod
 from descent.methods.descent_result import DescentResult
 from utils import config
@@ -96,22 +97,21 @@ class LBfgsDescentMethod(DescentMethod):
                     alpha_lo = alpha_j
 
     def __init__(self, r, start, xs, ys):
+        super().__init__(xs, ys)
         self.start = start
         self.r = r
-        self.ys = ys
-        self.xs = xs
 
     def jacobian(self, b, eps=1e-6):
         grads = []
         for i in range(len(b)):
-            t = np.zeros(len(b)).astype(float)
+            t = np.zeros(len(b), dtype=config.dtype)
             t[i] = t[i] + eps
-            grad = (self.r(b + t, self.xs) - self.r(b - t, self.xs)) / (2 * eps)
+            grad = (self.r(b + t, self._xs) - self.r(b - t, self._xs)) / (2 * eps)
             grads.append(grad)
         return np.column_stack(grads)
 
     def dy(self, b):
-        return self.ys - self.r(b, self.xs)
+        return self._ys - self.r(b, self._xs)
 
     def f(self, b):
         return np.sum(self.dy(b) ** 2)
@@ -228,7 +228,7 @@ if __name__ == "__main__":
     x_0 = np.ones(10)
 
     # x_0 = np.mat([[0.], [0.]])
-    result = LBfgsDescentMethod(r, x_0, xs, ys).converge()
+    result = LBFGSDescentMethod(r, x_0, xs, ys).converge()
 
     print(result)
     drawer = Drawer(result)
