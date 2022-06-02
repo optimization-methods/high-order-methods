@@ -26,8 +26,8 @@ def l_bfgs(task: Data) -> DescentMethod:
 
 def each(task: Data) -> list[DescentMethod]:
     return [
-        dogleg(task),
-        gauss(task),
-        bfgs(task),
-        # l_bfgs(task),
+        # dogleg(task),
+        # gauss(task),
+        # bfgs(task),
+        l_bfgs(task),
     ]

@@ -6,7 +6,7 @@ import matplotlib as mpl
 # mpl.use("TkAgg")
 
 def converge(method):
-    print('testing...')
+    print(f'testing {method.name}...')
     result = method.converge()
     print(f'{method.name} {result.rescaled_scalars[-1]}')
     drawer = Drawer(result)

@@ -140,8 +140,8 @@ class Drawer(object):
             y = scalar[0]
             for i in range(1, len(scalar)):
                 y += x * scalar[i]
-
-            plt.plot(x, y, color=c,
+            plt.plot(x, y,
+                     color=(next(color)),
                      linewidth=(3 if index == 0 or index == (len(scalars) - 1) else 0.6))
 
         self.__set_headers('Linear Regression')

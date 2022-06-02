@@ -31,10 +31,11 @@ class BFGSDescentMethod(DescentMethod):
         while ln.norm(g) > self.eps:
             direction = -np.dot(h, g)
 
-            alpha = LineSearch(x0, direction,
-                               function=self.calculus.f,
-                               gradient=self.gradient
-                               ).find()
+            alpha = LineSearch(
+                x0, direction,
+                function=self.calculus.f,
+                gradient=self.calculus.gradient
+            ).find()
 
             x1 = x0 + alpha * direction
             step = x1 - x0
