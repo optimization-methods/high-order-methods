@@ -19,6 +19,7 @@ def polynomial_data(coefficients_number) -> Data:
     start = np.ones(coefficients_number)
     return Data(f, xs, ys, start)
 
+
 def fractional_data() -> Data:
     def f(m_b, m_x):
         return m_b[0] * m_x / (m_b[1] + m_x)

@@ -49,7 +49,6 @@ class LBFGSDescentMethod(DescentMethod):
 
             points.append(point.tolist())
             k += 1
-            # print(k)
 
         # noinspection SpellCheckingInspection
         return DescentResult(self.calculus.f, points, points, r=self._r, method_name='L_BFGS')
