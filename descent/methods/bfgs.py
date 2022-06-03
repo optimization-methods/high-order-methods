@@ -49,6 +49,7 @@ class BFGSDescentMethod(DescentMethod):
 
             points.append(x0.tolist())
 
+        print(f'bfgs {len(points)}')
         # noinspection SpellCheckingInspection
         return DescentResult(self.calculus.f, points, points, r=self._r, method_name='BFGS')
 

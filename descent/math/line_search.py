@@ -1,6 +1,5 @@
 import numpy as np
 
-
 class LineSearch:
     def __init__(self, point, d, function, gradient):
         self.point = point

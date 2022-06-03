@@ -3,6 +3,8 @@ import numpy as np
 from descent.math.calculus import Calculus
 from descent.methods.descent_method import DescentMethod
 from descent.methods.descent_result import DescentResult
+from utils import config
+
 
 class GaussNewtonDescentMethod(DescentMethod):
     def __init__(self, r, start, xs, ys, epoch=30, tolerance=1e-5):
@@ -19,7 +21,7 @@ class GaussNewtonDescentMethod(DescentMethod):
         points.append(new.tolist())
 
         for _ in range(self.epoch):
-            old = new
+            old = new.copy()
             jacobian = self.calculus.jacobian(old)
             dy = self.calculus.dy(old)
             new = old + np.linalg.inv(jacobian.T @ jacobian) @ jacobian.T @ dy

@@ -2,7 +2,6 @@ import numpy as np
 
 from utils import config
 
-
 class Calculus:
     def __init__(self, xs, ys, r):
         self.__xs = xs

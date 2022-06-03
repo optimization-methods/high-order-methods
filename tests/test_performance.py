@@ -41,9 +41,11 @@ def test_memory(data: Data, epoch=100):
     return test_measure(data, measure_memory, 'Memory (KB)', epoch)
 
 def test_performance():
-    data = datas.polynomial_data(5)
-    test_time(data, 1)
-    test_memory(data, 1)
+    # data = datas.fractional_data()
+    data = datas.polynomial_data(1)
+    # data = datas.polynomial_3d_data()
+    test_time(data, 10)
+    test_memory(data, 10)
 
 
 if __name__ == "__main__":

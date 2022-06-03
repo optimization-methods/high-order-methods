@@ -6,7 +6,6 @@ import utils.config as config
 
 save_directory = f"{config.source}/images"
 
-
 # noinspection SpellCheckingInspection
 class Drawer(object):
     def __init__(self, sgd_result):
