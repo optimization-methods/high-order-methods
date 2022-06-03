@@ -56,8 +56,10 @@ def test_3d_polynomial_approximation():
 
 
 if __name__ == "__main__":
-    test_3d_polynomial_approximation()
+    # test_3d_polynomial_approximation()
+
     test_2d_linear_regression()
-    test_2d_polynomial_approximation()
-    test_2d_fractional_approximation()
     test_2d_converge_projection()
+
+    # test_2d_polynomial_approximation()
+    # test_2d_fractional_approximation()

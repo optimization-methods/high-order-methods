@@ -16,9 +16,8 @@ class GaussNewtonDescentMethod(DescentMethod):
         self.tolerance = tolerance
 
     def converge(self):
-        points = []
-        new = np.array(self.start)
-        points.append(new.tolist())
+        points = [self.start]
+        new = np.array(self.start, dtype=config.dtype)
 
         for _ in range(self.epoch):
             old = new.copy()

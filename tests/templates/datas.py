@@ -13,7 +13,7 @@ def polynomial_data(coefficients_number) -> Data:
             accumulator += m_b[i] * m_x ** i
         return accumulator
 
-    data = DatasetReader('planar').parse()
+    data = DatasetReader('planar_hard').parse()
     xs = np.array(data.input)[:, 0]
     ys = data.output
     start = np.ones(coefficients_number)
