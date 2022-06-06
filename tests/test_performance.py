@@ -8,6 +8,7 @@ from descent.methods.descent_method import DescentMethod
 from tests.templates import datas, methods
 from tests.templates.data import Data
 
+
 def measure_time(method, epoch):
     start_time = datetime.now()
     print(method.name)
@@ -15,6 +16,7 @@ def measure_time(method, epoch):
         method.converge()
     end_time = datetime.now()
     return (end_time - start_time).total_seconds()
+
 
 def measure_memory(method, epoch):
     tracemalloc.start()
@@ -25,6 +27,7 @@ def measure_memory(method, epoch):
     tracemalloc.stop()
     return peak / 1024
 
+
 def test_measure(data: Data, measure: Callable[[DescentMethod, int], float], name: str, epoch: int):
     measurements = [(method.name, measure(method, epoch)) for method in methods.each(data)]
 
@@ -32,13 +35,16 @@ def test_measure(data: Data, measure: Callable[[DescentMethod, int], float], nam
     plt.bar([item[0] for item in measurements], [item[1] for item in measurements])
     plt.show()
 
+
 def test_time(data: Data, epoch=100):
     print(f'===TIME===')
     return test_measure(data, measure_time, 'Time (s)', epoch)
 
+
 def test_memory(data: Data, epoch=100):
     print(f'===MEMORY===')
     return test_measure(data, measure_memory, 'Memory (KB)', epoch)
+
 
 def test_performance():
     # data = datas.fractional_data()
